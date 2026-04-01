@@ -44,6 +44,7 @@ from telebot.types import (
     ReplyKeyboardRemove,
 )
 from telethon import TelegramClient
+from telethon.sessions import StringSession
 from telethon.errors import (
     FloodWaitError, SessionPasswordNeededError,
     PhoneCodeInvalidError, AuthKeyError,
@@ -241,6 +242,19 @@ BOT_TOKEN   = os.getenv("BOT_TOKEN", "")
 ADMIN_IDS   = list(map(int, os.getenv("ADMIN_IDS","0").split(","))) if os.getenv("ADMIN_IDS") else []
 ENC_KEY     = os.getenv("ENCRYPTION_KEY", "")
 TIMEZONE    = os.getenv("TIMEZONE", "Africa/Cairo")
+# دعم Session Strings متعددة
+def load_all_sessions():
+    """جلب كل Session Strings من متغيرات البيئة"""
+    sessions = {}
+    for key, value in os.environ.items():
+        if key.startswith("SESSION_"):
+            session_num = key.replace("SESSION_", "")
+            sessions[session_num] = value
+    return sessions
+
+SESSION_ACCOUNTS = load_all_sessions()
+DEFAULT_API_ID = int(os.getenv("DEFAULT_API_ID", "2040"))
+DEFAULT_API_HASH = os.getenv("DEFAULT_API_HASH", "b18441a1ff607e10a989891a5462e627")
 LOG_LEVEL   = os.getenv("LOG_LEVEL", "INFO")
 MIN_DELAY   = float(os.getenv("MIN_DELAY", "3.0"))
 MAX_DELAY   = float(os.getenv("MAX_DELAY", "8.0"))
@@ -854,6 +868,35 @@ class UserBotClient:
             "reconnects": self.reconnect_count,
         }
 
+    async def connect_with_string(self, session_string: str) -> bool:
+        """الاتصال باستخدام Session String مباشرة بدون ملف جلسة"""
+        try:
+            self._client = TelegramClient(
+                StringSession(session_string), self.api_id, self.api_hash,
+                flood_sleep_threshold=60, connection_retries=5,
+                retry_delay=1, auto_reconnect=True,
+                device_model="Samsung Galaxy S23",
+                system_version="Android 14",
+                app_version="10.3.2",
+                lang_code="ar",
+            )
+            await self._client.connect()
+            if not await self._client.is_user_authorized():
+                logger.warning(f"[{self.phone}] Session String غير مصرح")
+                return False
+            self._me = await self._client.get_me()
+            self._connected = True
+            self.connect_time = datetime.now()
+            self._start_watchdog()
+            logger.info(f"✅ [Session String #{self.account_id}] {self._me.first_name} - متصل")
+            return True
+        except AuthKeyError:
+            logger.error(f"[Session String #{self.account_id}] مفتاح منتهي أو غير صالح")
+            return False
+        except Exception as e:
+            logger.error(f"[Session String #{self.account_id}] فشل الاتصال: {e}")
+            return False
+
 # ══════════════════════════════════════════════
 #  ⚡ UserBot Actions
 # ══════════════════════════════════════════════
@@ -998,14 +1041,51 @@ _login_sessions: Dict[str, dict]           = {}
 _mgr_lock = asyncio.Lock()
 
 async def mgr_load_all():
+    # ── تحميل الحسابات من قاعدة البيانات ──
     accounts = await db_get_all_accounts(active_only=True)
-    logger.info(f"تحميل {len(accounts)} حساب...")
-    if not accounts:
-        logger.info("لا توجد حسابات مسجلة")
-        return
-    results = await asyncio.gather(*[_start_acc(a) for a in accounts], return_exceptions=True)
-    ok = sum(1 for r in results if r is True)
-    logger.info(f"✅ {ok}/{len(accounts)} حساب متصل")
+    logger.info(f"تحميل {len(accounts)} حساب من قاعدة البيانات...")
+    db_results = []
+    if accounts:
+        db_results = await asyncio.gather(*[_start_acc(a) for a in accounts], return_exceptions=True)
+        ok_db = sum(1 for r in db_results if r is True)
+        logger.info(f"✅ {ok_db}/{len(accounts)} حساب DB متصل")
+    else:
+        logger.info("لا توجد حسابات في قاعدة البيانات")
+
+    # ── تحميل الحسابات من SESSION_ متغيرات البيئة ──
+    if SESSION_ACCOUNTS:
+        logger.info(f"🔑 وجدت {len(SESSION_ACCOUNTS)} Session String في متغيرات البيئة...")
+        env_results = await asyncio.gather(
+            *[load_session_from_env(num, ss) for num, ss in SESSION_ACCOUNTS.items()],
+            return_exceptions=True
+        )
+        ok_env = sum(1 for r in env_results if r is True)
+        logger.info(f"✅ {ok_env}/{len(SESSION_ACCOUNTS)} Session String متصل")
+    else:
+        logger.info("لا توجد Session Strings في متغيرات البيئة")
+
+async def load_session_from_env(session_num: str, session_string: str) -> bool:
+    """تحميل حساب من Session String في متغيرات البيئة"""
+    # توليد ID وهمي فريد للحسابات البيئية (سالب لتمييزها)
+    fake_id = -(abs(hash(session_string)) % 999999 + 1)
+    # تجنب التكرار إذا كان محمّلاً بالفعل
+    if fake_id in _clients:
+        return _clients[fake_id].is_connected
+    phone_label = f"ENV_SESSION_{session_num}"
+    ub = UserBotClient(fake_id, phone_label, DEFAULT_API_ID, DEFAULT_API_HASH, f"env_session_{session_num}")
+    try:
+        if await ub.connect_with_string(session_string):
+            async with _mgr_lock:
+                _clients[fake_id] = ub
+                _actions[fake_id] = UserBotActions(ub)
+            logger.info(f"✅ SESSION_{session_num} ({ub.display_name()}) متصل — ID: {fake_id}")
+            return True
+        else:
+            logger.warning(f"⚠️ SESSION_{session_num} فشل الاتصال")
+            return False
+    except Exception as e:
+        logger.error(f"❌ SESSION_{session_num} خطأ: {e}")
+        return False
 
 async def _start_acc(acc: dict) -> bool:
     aid = acc["id"]
@@ -2551,7 +2631,10 @@ def setup_bot():
             f"*📊 نظام:*\n"
             f"/stats — إحصائيات\n"
             f"/ping — اختبار\n"
-            f"/menu — القائمة الرئيسية",
+            f"/menu — القائمة الرئيسية\n\n"
+            f"*🔑 Session Strings:*\n"
+            f"/showsessions — عرض جلسات البيئة\n"
+            f"/reloadsessions — إعادة تحميل الجلسات",
             parse_mode="Markdown",
             reply_markup=kb_main_menu()
         )
@@ -2570,12 +2653,70 @@ def setup_bot():
             BotCommand("send",        "📤 إرسال رسالة"),
             BotCommand("broadcast",   "📡 بث جماعي"),
             BotCommand("join",        "👥 انضمام لجروب"),
-            BotCommand("dialogs",     "💬 عرض المحادثات"),
-            BotCommand("help",        "❓ المساعدة"),
+            BotCommand("dialogs",        "💬 عرض المحادثات"),
+            BotCommand("showsessions",   "🔑 عرض Session Strings"),
+            BotCommand("reloadsessions", "🔄 إعادة تحميل الجلسات"),
+            BotCommand("help",           "❓ المساعدة"),
         ])
         bot.reply_to(msg, "✅ *تم تعيين الأوامر بنجاح!*", parse_mode="Markdown")
 
     # ── Fallback ──
+    @bot.message_handler(commands=["showsessions"])
+    def cmd_showsessions(msg: Message):
+        if not is_admin(msg): return
+        if not SESSION_ACCOUNTS:
+            return bot.reply_to(msg,
+                "⚠️ *لا توجد Session Strings في متغيرات البيئة*\n\n"
+                "_أضف متغيرات بالشكل: `SESSION_1`, `SESSION_2`, ..._",
+                parse_mode="Markdown"
+            )
+        lines = [f"🔑 *Session Strings المحملة*\n`{'━'*28}`\n"]
+        for num, ss in SESSION_ACCOUNTS.items():
+            fake_id = -(abs(hash(ss)) % 999999 + 1)
+            client = _clients.get(fake_id)
+            status = S.status_badge(client.is_connected if client else False)
+            name = client.display_name() if client else "—"
+            preview = ss[:8] + "..." + ss[-4:] if len(ss) > 14 else ss
+            lines.append(
+                f"▸ *SESSION\\_{num}*\n"
+                f"  👤 {name} | {status}\n"
+                f"  🆔 `{fake_id}`\n"
+                f"  🔐 `{preview}`\n"
+            )
+        bot.send_message(msg.chat.id, "\n".join(lines), parse_mode="Markdown")
+
+    @bot.message_handler(commands=["reloadsessions"])
+    def cmd_reloadsessions(msg: Message):
+        if not is_admin(msg): return
+        if not SESSION_ACCOUNTS:
+            return bot.reply_to(msg, "⚠️ لا توجد SESSION_ متغيرات في البيئة", parse_mode="Markdown")
+        m = bot.reply_to(msg,
+            f"🔄 *إعادة تحميل {len(SESSION_ACCOUNTS)} Session String...*",
+            parse_mode="Markdown"
+        )
+        # حذف الجلسات البيئية القديمة أولاً
+        to_remove = [aid for aid in list(_clients.keys()) if aid < 0]
+        for aid in to_remove:
+            arun(_clients[aid].disconnect())
+            _clients.pop(aid, None)
+            _actions.pop(aid, None)
+        # إعادة تحميل من متغيرات البيئة الحالية
+        fresh = load_all_sessions()
+        SESSION_ACCOUNTS.clear()
+        SESSION_ACCOUNTS.update(fresh)
+        results = arun(asyncio.gather(
+            *[load_session_from_env(num, ss) for num, ss in SESSION_ACCOUNTS.items()],
+            return_exceptions=True
+        ))
+        ok = sum(1 for r in results if r is True)
+        bot.edit_message_text(
+            f"✅ *إعادة التحميل اكتملت*\n\n"
+            f"🔑 إجمالي: `{len(SESSION_ACCOUNTS)}`\n"
+            f"🟢 متصل: `{ok}`\n"
+            f"🔴 فشل: `{len(SESSION_ACCOUNTS) - ok}`",
+            m.chat.id, m.message_id, parse_mode="Markdown"
+        )
+
     @bot.message_handler(func=lambda m: True)
     def fallback(msg: Message):
         if not is_admin(msg): return
