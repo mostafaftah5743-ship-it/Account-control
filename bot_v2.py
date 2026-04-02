@@ -1,12 +1,12 @@
 """
-╔══════════════════════════════════════════════════════════╗
-║     🤖 Telegram Multi-Account Manager v2.0              ║
-║     Advanced Userbot + Control Bot System               ║
-║     By: @YourUsername                                   ║
-╚══════════════════════════════════════════════════════════╝
+╔══════════════════════════════════════════════════════════════╗
+║  ⚡ TG MANAGER PRO v3.0  —  Multi-Account Telegram Bot      ║
+║  ▸ Full Inline UI   ▸ Session Strings   ▸ Anti-Ban          ║
+║  ▸ Smart Scheduler  ▸ Broadcast  ▸ DM Friends               ║
+╚══════════════════════════════════════════════════════════════╝
 
 المتطلبات:
-pip install telethon pyTelegramBotAPI apscheduler aiosqlite cryptography colorlog pytz python-dotenv
+pip install telethon pyTelegramBotAPI apscheduler aiosqlite cryptography pytz python-dotenv
 """
 
 import os, json, asyncio, logging, random, signal, sys, time
@@ -68,82 +68,47 @@ import pytz
 # ══════════════════════════════════════════════
 
 class Style:
-    """تنسيق موحد لجميع رسائل البوت"""
+    """تنسيق موحد لجميع رسائل البوت — v3 Dark Theme"""
 
-    # ── Headers ──
-    HEADER = "━" * 30
-    DIVIDER = "┄" * 25
-    LINE = "─" * 20
+    HEADER   = "▰" * 14
+    DIVIDER  = "┄" * 20
+    LINE     = "▱" * 12
 
-    # ── Icons ──
-    SUCCESS   = "✅"
-    ERROR     = "❌"
-    WARNING   = "⚠️"
-    INFO      = "ℹ️"
-    LOADING   = "⏳"
-    DONE      = "🎯"
-    FIRE      = "🔥"
-    STAR      = "⭐"
-    LOCK      = "🔐"
-    PHONE     = "📱"
-    BOT       = "🤖"
-    ACCOUNT   = "👤"
-    TASK      = "⚙️"
-    SCHEDULE  = "📅"
-    STATS     = "📊"
-    LOG       = "📋"
-    SEND      = "📤"
-    RECEIVE   = "📥"
-    GROUP     = "👥"
-    SHIELD    = "🛡"
-    CLOCK     = "🕐"
-    ROCKET    = "🚀"
-    GEAR      = "⚙️"
-    DATABASE  = "🗄"
-    ONLINE    = "🟢"
-    OFFLINE   = "🔴"
-    IDLE      = "🟡"
-    BANNED    = "🚫"
-    CROWN     = "👑"
-    LIGHTNING = "⚡"
-    CHART     = "📈"
-    BELL      = "🔔"
-    PIN       = "📌"
-    FOLDER    = "📁"
-    KEY       = "🔑"
-    LINK      = "🔗"
-    SEARCH    = "🔍"
-    TRASH     = "🗑"
-    EDIT      = "✏️"
-    BACK      = "◀️"
-    NEXT      = "▶️"
-    UP        = "⬆️"
-    DOWN      = "⬇️"
-    REFRESH   = "🔄"
-    PLAY      = "▶️"
-    STOP      = "⏹"
-    PAUSE     = "⏸"
-    FORWARD   = "↪️"
-    NEW       = "🆕"
-    ID        = "🆔"
-    BROADCAST = "📡"
-    WORLD     = "🌍"
-    COPY      = "📋"
+    SUCCESS   = "✅"; ERROR    = "❌"; WARNING  = "⚠️"; INFO     = "ℹ️"
+    LOADING   = "⏳"; DONE    = "🎯"; FIRE     = "🔥"; STAR     = "⭐"
+    LOCK      = "🔐"; PHONE   = "📱"; BOT      = "🤖"; ACCOUNT  = "👤"
+    TASK      = "⚙️"; SCHEDULE= "📅"; STATS    = "📊"; LOG      = "📋"
+    SEND      = "📤"; RECEIVE = "📥"; GROUP    = "👥"; SHIELD   = "🛡️"
+    CLOCK     = "⏰"; ROCKET  = "🚀"; GEAR     = "⚙️"; DATABASE = "🗄️"
+    ONLINE    = "🟢"; OFFLINE = "🔴"; IDLE     = "🟡"; BANNED   = "🚫"
+    CROWN     = "👑"; LIGHTNING="⚡"; CHART    = "📈"; BELL     = "🔔"
+    PIN       = "📌"; FOLDER  = "📁"; KEY      = "🔑"; LINK     = "🔗"
+    SEARCH    = "🔍"; TRASH   = "🗑️"; EDIT     = "✏️"; BACK     = "◀️"
+    NEXT      = "▶️"; UP      = "⬆️"; DOWN     = "⬇️"; REFRESH  = "🔄"
+    PLAY      = "▶️"; STOP    = "⏹️"; PAUSE    = "⏸️"; FORWARD  = "↪️"
+    NEW       = "🆕"; ID      = "🆔"; BROADCAST= "📡"; WORLD    = "🌍"
+    COPY      = "📋"; DIAMOND = "💎"; ALIEN    = "👾"; SPARKLE  = "✨"
+    FRIEND    = "🤝"; CHAT    = "💬"; LEAVE    = "🚪"; JOIN     = "🔗"
 
     @staticmethod
-    def header(title: str, icon: str = "🤖") -> str:
-        return (
-            f"{icon} *{title}*\n"
-            f"`{'━' * 28}`"
-        )
+    def header(title: str, icon: str = "⚡") -> str:
+        top = "╔" + "═" * 26 + "╗"
+        mid = f"║  {icon}  {title}"
+        mid = mid.ljust(28) + "║"
+        bot_ = "╚" + "═" * 26 + "╝"
+        return f"`{top}`\n`{mid}`\n`{bot_}`"
 
     @staticmethod
-    def section(title: str, icon: str = "•") -> str:
+    def mini_header(title: str, icon: str = "▸") -> str:
+        return f"┌─ {icon} *{title}*\n└{'─'*18}"
+
+    @staticmethod
+    def section(title: str, icon: str = "◆") -> str:
         return f"\n{icon} *{title}*"
 
     @staticmethod
-    def field(label: str, value: Any, icon: str = "▸") -> str:
-        return f"{icon} {label}: `{value}`"
+    def field(label: str, value, icon: str = "▸") -> str:
+        return f"  {icon} {label}: `{value}`"
 
     @staticmethod
     def success(msg: str) -> str:
@@ -151,11 +116,11 @@ class Style:
 
     @staticmethod
     def error(msg: str) -> str:
-        return f"❌ *خطأ:* {msg}"
+        return f"❌ *خطأ:* _{msg}_"
 
     @staticmethod
     def warning(msg: str) -> str:
-        return f"⚠️ *تحذير:* {msg}"
+        return f"⚠️ *تحذير:* _{msg}_"
 
     @staticmethod
     def loading(msg: str) -> str:
@@ -175,15 +140,15 @@ class Style:
 
     @staticmethod
     def status_badge(is_connected: bool, is_banned: bool = False) -> str:
-        if is_banned:   return "🚫 محظور"
-        if is_connected: return "🟢 متصل"
-        return "🔴 منفصل"
+        if is_banned:    return "🚫 *محظور*"
+        if is_connected: return "🟢 *متصل*"
+        return "🔴 *منفصل*"
 
     @staticmethod
-    def progress_bar(current: int, total: int, length: int = 10) -> str:
+    def progress_bar(current: int, total: int, length: int = 12) -> str:
         if total == 0: return "░" * length
         filled = int(length * current / total)
-        return "█" * filled + "░" * (length - filled)
+        return "▓" * filled + "░" * (length - filled)
 
     @staticmethod
     def format_number(n: int) -> str:
@@ -198,11 +163,11 @@ class Style:
             now = datetime.utcnow()
             diff = now - dt
             total = int(diff.total_seconds())
-            if total < 60:    return "منذ لحظات"
-            if total < 3600:  return f"منذ {total//60} دقيقة"
-            if total < 86400: return f"منذ {total//3600} ساعة"
-            if diff.days == 1:       return "أمس"
-            return dt.strftime("%Y-%m-%d %H:%M")
+            if total < 60:    return "🕐 منذ لحظات"
+            if total < 3600:  return f"🕐 منذ {total//60} دقيقة"
+            if total < 86400: return f"🕐 منذ {total//3600} ساعة"
+            if diff.days == 1:       return "📅 أمس"
+            return f"📅 {dt.strftime('%Y-%m-%d %H:%M')}"
         except Exception:
             return dt_str[:16] if dt_str else "—"
 
@@ -210,7 +175,7 @@ class Style:
     def task_type_icon(task_type: str) -> str:
         return {
             "send_message": "💬",
-            "join_group":   "👥",
+            "join_group":   "🔗",
             "leave_group":  "🚪",
             "forward":      "↪️",
         }.get(task_type, "⚙️")
@@ -227,9 +192,9 @@ class Style:
     @staticmethod
     def trigger_type_ar(ttype: str) -> str:
         return {
-            "once":     "مرة واحدة",
-            "interval": "تكرار",
-            "cron":     "Cron",
+            "once":     "⏰ مرة واحدة",
+            "interval": "🔁 تكرار",
+            "cron":     "📆 Cron",
         }.get(ttype, ttype)
 
 
@@ -257,13 +222,13 @@ SESSION_ACCOUNTS = load_all_sessions()
 DEFAULT_API_ID = int(os.getenv("DEFAULT_API_ID", "2040"))
 DEFAULT_API_HASH = os.getenv("DEFAULT_API_HASH", "b18441a1ff607e10a989891a5462e627")
 LOG_LEVEL   = os.getenv("LOG_LEVEL", "INFO")
-MIN_DELAY   = float(os.getenv("MIN_DELAY", "3.0"))
-MAX_DELAY   = float(os.getenv("MAX_DELAY", "8.0"))
+MIN_DELAY   = float(os.getenv("MIN_DELAY", "0.5"))
+MAX_DELAY   = float(os.getenv("MAX_DELAY", "2.0"))
 JOIN_DELAY  = float(os.getenv("JOIN_DELAY", "30.0"))
 RATE_MSGS   = int(os.getenv("RATE_LIMIT_MESSAGES", "20"))
 RATE_PERIOD = int(os.getenv("RATE_LIMIT_PERIOD", "60"))
-BOT_NAME    = os.getenv("BOT_NAME", "TG Manager")
-VERSION     = "2.0.0"
+BOT_NAME    = os.getenv("BOT_NAME", "TG Manager Pro")
+VERSION     = "4.0.0"
 
 BASE_DIR     = Path(__file__).parent
 SESSIONS_DIR = BASE_DIR / "sessions"
@@ -459,7 +424,11 @@ async def db_increment_account_stat(aid: int, field: str):
     if field not in _ALLOWED_STAT_FIELDS:
         logger.error(f"حقل غير مسموح: {field}")
         return
-    await _db.execute(f"UPDATE accounts SET {field}={field}+1, last_used=datetime('now') WHERE id=?", (aid,))
+    now_iso = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    await _db.execute(
+        f"UPDATE accounts SET {field}={field}+1, last_used=? WHERE id=?",
+        (now_iso, aid)
+    )
     await _db.commit()
 
 # ─── Tasks ───
@@ -481,12 +450,12 @@ async def db_get_task(tid: int) -> Optional[dict]:
 async def db_get_all_tasks(account_id: int = None) -> List[dict]:
     if account_id:
         cur = await _db.execute(
-            "SELECT t.*, a.phone, a.username, a.full_name FROM tasks t JOIN accounts a ON t.account_id=a.id WHERE t.is_active=1 AND t.account_id=? ORDER BY t.id DESC",
+            "SELECT t.*, a.phone, a.username, a.full_name FROM tasks t LEFT JOIN accounts a ON t.account_id=a.id WHERE t.is_active=1 AND t.account_id=? ORDER BY t.id DESC",
             (account_id,)
         )
     else:
         cur = await _db.execute(
-            "SELECT t.*, a.phone, a.username, a.full_name FROM tasks t JOIN accounts a ON t.account_id=a.id WHERE t.is_active=1 ORDER BY t.id DESC"
+            "SELECT t.*, a.phone, a.username, a.full_name FROM tasks t LEFT JOIN accounts a ON t.account_id=a.id WHERE t.is_active=1 ORDER BY t.id DESC"
         )
     return [dict(r) for r in await cur.fetchall()]
 
@@ -638,16 +607,17 @@ class TokenBucket:
         self._lock    = asyncio.Lock()
 
     async def acquire(self):
-        async with self._lock:
-            now = time.monotonic()
-            self.tokens = min(self.capacity, self.tokens + (now - self.last) * self.rate)
-            self.last = now
-            if self.tokens >= 1:
-                self.tokens -= 1
-                return
-            wait = (1 - self.tokens) / self.rate
+        while True:
+            async with self._lock:
+                now = time.monotonic()
+                self.tokens = min(self.capacity, self.tokens + (now - self.last) * self.rate)
+                self.last = now
+                if self.tokens >= 1:
+                    self.tokens -= 1
+                    return
+                wait = (1 - self.tokens) / self.rate
+            # حرر القفل أثناء الانتظار حتى لا يُعطّل المهام الأخرى
             await asyncio.sleep(wait)
-            self.tokens = 0
 
     def available(self) -> float:
         now = time.monotonic()
@@ -682,9 +652,9 @@ async def smart_delay(aid: int, mn=None, mx=None):
     mx = MAX_DELAY if mx is None else mx
     delay = random.uniform(mn, mx)
 
-    # Jitter إضافي أحيانًا
-    if random.random() < 0.15:
-        delay += random.uniform(2, 6)
+    # Jitter إضافي أحيانًا (مخفف)
+    if random.random() < 0.05:
+        delay += random.uniform(0.5, 2)
 
     # احترم الحد الأدنى منذ آخر عملية
     last = _last_action.get(aid, 0)
@@ -818,8 +788,14 @@ class UserBotClient:
         if not self._client:
             self._client = TelegramClient(self.session_path, self.api_id, self.api_hash)
             await self._client.connect()
-        r = await self._client.send_code_request(self.phone)
-        return r.phone_code_hash
+        try:
+            r = await self._client.send_code_request(self.phone)
+            return r.phone_code_hash
+        except FloodWaitError as e:
+            logger.warning(f"[{self.phone}] FloodWait عند طلب الكود: {e.seconds}s")
+            raise Exception(f"⚠️ انتظر {e.seconds} ثانية ثم حاول مجدداً (Flood)")
+        except Exception:
+            raise
 
     async def sign_in(self, code: str, hash_: str, password: str = None) -> bool:
         try:
@@ -913,7 +889,7 @@ class UserBotActions:
     def __init__(self, ub: UserBotClient):
         self.ub = ub
 
-    async def send_message(self, target, text, parse_mode="markdown", typing=True, reply_to=None) -> bool:
+    async def send_message(self, target, text, parse_mode="markdown", typing=False, reply_to=None) -> bool:
         if not self.ub.is_connected: return False
         if await db_is_blacklisted(str(target)):
             logger.warning(f"[{self.ub.phone}] {target} في القائمة السوداء")
@@ -957,8 +933,12 @@ class UserBotActions:
     async def send_to_many(self, targets: list, text: str, parse_mode="markdown") -> Dict[str, str]:
         results = {}
         for i, t in enumerate(targets):
-            ok = await self.send_message(t, text, parse_mode)
-            results[str(t)] = "success" if ok else "failed"
+            try:
+                ok = await self.send_message(t, text, parse_mode)
+                results[str(t)] = "success" if ok else "failed"
+            except Exception as e:
+                logger.error(f"[{self.ub.phone}] send_to_many فشل لـ {t}: {e}")
+                results[str(t)] = "failed"
             if i < len(targets) - 1:
                 await smart_delay(self.ub.account_id, 5, 20)
         return results
@@ -986,12 +966,31 @@ class UserBotActions:
             return False
 
     async def leave_group(self, target) -> bool:
+        """مغادرة جروب — يدعم username, chat_id, رابط دعوة"""
         try:
-            entity = await self.ub.client.get_entity(target)
+            # تنظيف الرابط إذا كان رابط دعوة
+            if isinstance(target, str) and ("t.me/+" in target or "t.me/joinchat/" in target):
+                # محاولة الحصول على entity من الرابط
+                slug = target.split("/")[-1].replace("+", "")
+                try:
+                    entity = await self.ub.client.get_entity(f"t.me/joinchat/{slug}")
+                except Exception:
+                    try:
+                        entity = await self.ub.client.get_entity(int(slug))
+                    except Exception:
+                        return False
+            else:
+                # username أو chat_id
+                t = str(target).strip().lstrip("@")
+                try:
+                    entity = await self.ub.client.get_entity(int(t))
+                except (ValueError, TypeError):
+                    entity = await self.ub.client.get_entity(t)
             await self.ub.client(LeaveChannelRequest(entity))
+            logger.info(f"[{self.ub.phone}] ✅ غادر: {target}")
             return True
         except Exception as e:
-            logger.error(f"[{self.ub.phone}] فشل leave: {e}")
+            logger.error(f"[{self.ub.phone}] فشل leave {target}: {e}")
             return False
 
     async def forward_message(self, from_chat, msg_id: int, to_chat) -> bool:
@@ -1088,7 +1087,6 @@ async def load_session_from_env(session_num: str, session_string: str) -> bool:
         row = await cur.fetchone()
         if row:
             real_id = row[0]
-            # تحديث بيانات الحساب
             await db_update_account(real_id, username=username, full_name=full_name, is_active=1)
         else:
             real_id = await db_add_account(
@@ -1107,6 +1105,68 @@ async def load_session_from_env(session_num: str, session_string: str) -> bool:
     except Exception as e:
         logger.error(f"❌ SESSION_{session_num} خطأ: {e}")
         return False
+
+
+async def load_session_from_bot(session_string: str, added_by: int = 0) -> dict:
+    """
+    إضافة حساب عبر Session String مباشرة من داخل البوت.
+    يتحقق من الـ string، يتصل، ويخزن في DB.
+    """
+    session_string = session_string.strip()
+    if len(session_string) < 50:
+        return {"status": "error", "message": "Session String قصيرة جداً أو غير صحيحة"}
+
+    # اشتق اسم جلسة فريد من أول 12 حرف
+    sname = f"bot_ss_{session_string[:12].replace('/', '_').replace('+', '_')}"
+
+    # تحقق أن الـ session مش مضافة قبل كده
+    cur = await _db.execute("SELECT id, full_name FROM accounts WHERE session_name=?", (sname,))
+    existing = await cur.fetchone()
+    if existing:
+        return {
+            "status": "duplicate",
+            "message": f"هذه الجلسة مضافة مسبقاً",
+            "account_id": existing[0],
+            "name": existing[1],
+        }
+
+    ub = UserBotClient(0, f"BOT_SS_{sname}", DEFAULT_API_ID, DEFAULT_API_HASH, sname)
+    try:
+        connected = await ub.connect_with_string(session_string)
+        if not connected:
+            return {"status": "error", "message": "فشل الاتصال — تأكد أن الـ Session String صحيحة وغير منتهية"}
+
+        me = ub.me
+        username  = me.username if me else None
+        full_name = f"{me.first_name or ''} {me.last_name or ''}".strip() if me else sname
+        phone     = str(me.phone) if me and me.phone else sname
+
+        real_id = await db_add_account(
+            phone, str(DEFAULT_API_ID), DEFAULT_API_HASH, sname,
+            username=username, full_name=full_name,
+            notes=f"أُضيف عبر البوت بواسطة {added_by}"
+        )
+        ub.account_id = real_id
+        async with _mgr_lock:
+            _clients[real_id] = ub
+            _actions[real_id] = UserBotActions(ub)
+
+        await db_add_notification("new_account", "حساب جديد عبر Session String", full_name)
+        logger.info(f"✅ Session String جديد ({full_name}) أُضيف عبر البوت — DB ID: {real_id}")
+        return {
+            "status": "success",
+            "account_id": real_id,
+            "name": full_name,
+            "username": username,
+            "phone": phone,
+        }
+    except Exception as e:
+        logger.error(f"❌ load_session_from_bot خطأ: {e}")
+        try:
+            await ub.disconnect()
+        except Exception:
+            pass
+        return {"status": "error", "message": str(e)}
 
 async def _start_acc(acc: dict) -> bool:
     aid = acc["id"]
@@ -1309,23 +1369,34 @@ def sched_jobs() -> list:
 def kb_main_menu() -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup(row_width=2)
     kb.add(
-        InlineKeyboardButton("👤 الحسابات",    callback_data="menu_accounts"),
-        InlineKeyboardButton("⚙️ المهام",       callback_data="menu_tasks"),
-        InlineKeyboardButton("📅 الجداول",      callback_data="menu_schedules"),
-        InlineKeyboardButton("📊 الإحصائيات",  callback_data="menu_stats"),
-        InlineKeyboardButton("📋 السجلات",     callback_data="menu_logs"),
-        InlineKeyboardButton("🛡 الحماية",      callback_data="menu_protection"),
+        InlineKeyboardButton("👤 الحسابات",      callback_data="menu_accounts"),
+        InlineKeyboardButton("⚙️ المهام",         callback_data="menu_tasks"),
+        InlineKeyboardButton("📅 الجداول",        callback_data="menu_schedules"),
+        InlineKeyboardButton("📊 الإحصائيات",    callback_data="menu_stats"),
+        InlineKeyboardButton("📋 السجلات",       callback_data="menu_logs"),
+        InlineKeyboardButton("🛡️ الحماية",        callback_data="menu_protection"),
     )
-    kb.add(InlineKeyboardButton("🔔 الإشعارات", callback_data="menu_notifications"))
+    kb.row(
+        InlineKeyboardButton("🔔 الإشعارات",     callback_data="menu_notifications"),
+        InlineKeyboardButton("🤝 كلّم صاحب",     callback_data="menu_dm"),
+    )
+    kb.row(
+        InlineKeyboardButton("👥 أصدقائي وجروباتي", callback_data="menu_social"),
+    )
+    kb.row(
+        InlineKeyboardButton("🔄 تحديث القائمة", callback_data="back_main"),
+        InlineKeyboardButton("🔁 إعادة تشغيل البوت", callback_data="bot_restart"),
+    )
     return kb
 
 def kb_accounts_menu() -> InlineKeyboardMarkup:
     kb = InlineKeyboardMarkup(row_width=2)
     kb.add(
-        InlineKeyboardButton("📋 عرض الكل",      callback_data="acc_list"),
-        InlineKeyboardButton("➕ إضافة حساب",    callback_data="acc_add"),
-        InlineKeyboardButton("📊 إحصائيات",     callback_data="acc_stats"),
-        InlineKeyboardButton("◀️ رجوع",          callback_data="back_main"),
+        InlineKeyboardButton("📋 عرض الكل",         callback_data="acc_list"),
+        InlineKeyboardButton("➕ إضافة بهاتف",       callback_data="acc_add"),
+        InlineKeyboardButton("🔑 إضافة بـ Session",  callback_data="acc_add_ss"),
+        InlineKeyboardButton("📊 إحصائيات",          callback_data="acc_stats"),
+        InlineKeyboardButton("◀️ رجوع",              callback_data="back_main"),
     )
     return kb
 
@@ -1429,14 +1500,18 @@ def setup_bot():
     def cmd_start(msg: Message):
         if not is_admin(msg): return
         notifications = arun(db_get_unread_notifications())
-        notif_badge = f" 🔔{len(notifications)}" if notifications else ""
+        notif_badge = f" 🔔`{len(notifications)}`" if notifications else ""
+        connected   = mgr_count()
+        jobs        = len(sched_jobs())
+        now_str     = datetime.now(TZ).strftime("%H:%M  %d/%m/%Y")
         text = (
-            f"`{'━'*28}`\n"
-            f"  {S.BOT} *{BOT_NAME}*  `v{VERSION}`\n"
-            f"`{'━'*28}`\n\n"
-            f"{S.ONLINE} متصل: `{mgr_count()}`  "
-            f"{S.SCHEDULE} جداول: `{len(sched_jobs())}`{notif_badge}\n\n"
-            f"اختر من القائمة 👇"
+            f"`╔══════════════════════════╗`\n"
+            f"`║  ⚡  TG MANAGER PRO v3   ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"🟢 حسابات متصلة: *{connected}*\n"
+            f"📅 جداول نشطة:  *{jobs}*{notif_badge}\n"
+            f"🕐 `{now_str}`\n\n"
+            f"_اختر من القائمة 👇_"
         )
         bot.send_message(msg.chat.id, text, parse_mode="Markdown", reply_markup=kb_main_menu())
 
@@ -1445,12 +1520,17 @@ def setup_bot():
     @bot.callback_query_handler(func=lambda c: c.data == "back_main")
     def cb_main(call: CallbackQuery):
         if not is_admin(call): return
+        notifications = arun(db_get_unread_notifications())
+        notif_badge = f" 🔔`{len(notifications)}`" if notifications else ""
+        now_str     = datetime.now(TZ).strftime("%H:%M  %d/%m/%Y")
         text = (
-            f"`{'━'*28}`\n"
-            f"  {S.BOT} *{BOT_NAME}*\n"
-            f"`{'━'*28}`\n\n"
-            f"{S.ONLINE} متصل: `{mgr_count()}`  {S.SCHEDULE} جداول: `{len(sched_jobs())}`\n\n"
-            f"اختر من القائمة 👇"
+            f"`╔══════════════════════════╗`\n"
+            f"`║  ⚡  TG MANAGER PRO v3   ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"🟢 حسابات متصلة: *{mgr_count()}*\n"
+            f"📅 جداول نشطة:  *{len(sched_jobs())}*{notif_badge}\n"
+            f"🕐 `{now_str}`\n\n"
+            f"_اختر من القائمة 👇_"
         )
         edit_or_send(call, text, kb_main_menu())
         bot.answer_callback_query(call.id)
@@ -1465,6 +1545,143 @@ def setup_bot():
         edit_or_send(call, "❌ *تم الإلغاء*", kb_back("back_main"))
         bot.answer_callback_query(call.id)
 
+    @bot.callback_query_handler(func=lambda c: c.data == "bot_restart")
+    def cb_bot_restart(call: CallbackQuery):
+        if not is_admin(call): return
+        edit_or_send(call,
+            f"`╔══════════════════════════╗`\n"
+            f"`║  🔁  إعادة تشغيل البوت   ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"⚠️ هل تريد إعادة تشغيل البوت الآن؟\n\n"
+            f"_سيتم قطع الاتصال مؤقتاً ثم العودة_",
+            kb_confirm("bot_restart_confirm", "back_main")
+        )
+        bot.answer_callback_query(call.id)
+
+    @bot.callback_query_handler(func=lambda c: c.data == "bot_restart_confirm")
+    def cb_bot_restart_confirm(call: CallbackQuery):
+        if not is_admin(call): return
+        bot.answer_callback_query(call.id, "🔁 جاري إعادة التشغيل...")
+        try:
+            bot.edit_message_text(
+                f"`╔══════════════════════════╗`\n"
+                f"`║  🔁  جاري إعادة التشغيل  ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"⏳ _البوت سيعود خلال ثوانٍ..._",
+                call.message.chat.id, call.message.message_id,
+                parse_mode="Markdown"
+            )
+        except Exception: pass
+        logger.info(f"🔁 إعادة تشغيل بطلب من {call.from_user.id}")
+        def _restart():
+            import time as _t
+            _t.sleep(1.5)
+            try: _scheduler.shutdown(wait=False)
+            except Exception: pass
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+        threading.Thread(target=_restart, daemon=True).start()
+
+    # ══════════════════════════════════════════
+    #  🤝 إرسال رسالة لصاحب (DM Friends)
+    # ══════════════════════════════════════════
+
+    @bot.callback_query_handler(func=lambda c: c.data == "menu_dm")
+    def cb_menu_dm(call: CallbackQuery):
+        if not is_admin(call): return
+        accounts = mgr_get_all_for_task()
+        if not accounts:
+            edit_or_send(call,
+                f"`╔══════════════════════════╗`\n"
+                f"`║  🤝  إرسال لصاحب         ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"❌ _لا توجد حسابات متصلة_\n\nأضف حساباً أو تحقق من SESSION_",
+                kb_back("back_main")
+            )
+            bot.answer_callback_query(call.id)
+            return
+        uid = call.from_user.id
+        set_state(uid, {"step": "dm_pick_account"})
+        kb = InlineKeyboardMarkup(row_width=1)
+        for a in accounts:
+            kb.add(InlineKeyboardButton(
+                f"🟢 {a.get('full_name') or a['phone']} (#{a['id']})",
+                callback_data=f"dm_acc_{a['id']}"
+            ))
+        kb.add(InlineKeyboardButton("❌ إلغاء", callback_data="cancel"))
+        edit_or_send(call,
+            f"`╔══════════════════════════╗`\n"
+            f"`║  🤝  إرسال لصاحب - 1/3   ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"📱 اختر الحساب اللي هيبعت منه 👇",
+            kb
+        )
+        bot.answer_callback_query(call.id)
+
+    @bot.callback_query_handler(func=lambda c: c.data.startswith("dm_acc_"))
+    def cb_dm_acc(call: CallbackQuery):
+        uid = call.from_user.id
+        if not get_state(uid): return
+        aid = int(call.data.split("_", 2)[2])
+        _states[uid]["account_id"] = aid
+        _states[uid]["step"] = "dm_target"
+        edit_or_send(call,
+            f"`╔══════════════════════════╗`\n"
+            f"`║  🤝  إرسال لصاحب - 2/3   ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"👤 ابعت يوزر أو ID الشخص اللي تبي تكلمه:\n\n"
+            f"• `@username`\n"
+            f"• `123456789` (User ID)\n\n"
+            f"_ينفع تكلم أي شخص حتى لو مش في قائمتك_ ✅"
+        )
+        bot.answer_callback_query(call.id)
+
+    @bot.message_handler(func=lambda m: in_state(m.from_user.id, "dm_target"))
+    def dm_step_target(msg: Message):
+        uid = msg.from_user.id
+        target = msg.text.strip()
+        _states[uid]["target"] = target
+        _states[uid]["step"]   = "dm_text"
+        bot.send_message(msg.chat.id,
+            f"`╔══════════════════════════╗`\n"
+            f"`║  🤝  إرسال لصاحب - 3/3   ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"✏️ اكتب الرسالة اللي تبي تبعتها لـ `{target}` 👇",
+            parse_mode="Markdown"
+        )
+
+    @bot.message_handler(func=lambda m: in_state(m.from_user.id, "dm_text"))
+    def dm_step_text(msg: Message):
+        uid   = msg.from_user.id
+        state = _states.get(uid, {})
+        aid    = state.get("account_id")
+        target = state.get("target")
+        text   = msg.text
+        clear_state(uid)
+        actions = mgr_actions(aid)
+        if not actions:
+            return bot.send_message(msg.chat.id, "❌ *الحساب غير متصل*", parse_mode="Markdown")
+        m = bot.send_message(msg.chat.id, S.loading(f"جاري الإرسال إلى {target}"), parse_mode="Markdown")
+        ok = arun(actions.send_message(target, text, parse_mode="markdown"))
+        kb = InlineKeyboardMarkup(row_width=2)
+        kb.add(
+            InlineKeyboardButton("🤝 إرسال آخر", callback_data="menu_dm"),
+            InlineKeyboardButton("🏠 الرئيسية",  callback_data="back_main"),
+        )
+        result = (
+            f"✅ *تم الإرسال بنجاح!*\n\n"
+            f"👤 إلى: `{target}`\n"
+            f"📱 من الحساب: `{aid}`\n\n"
+            f"💬 _{text[:80]}{'...' if len(text)>80 else ''}_"
+        ) if ok else (
+            f"❌ *فشل الإرسال!*\n\n"
+            f"👤 الهدف: `{target}`\n"
+            f"_تأكد من صحة اليوزر/ID_"
+        )
+        try:
+            bot.edit_message_text(result, m.chat.id, m.message_id, parse_mode="Markdown", reply_markup=kb)
+        except Exception:
+            bot.send_message(msg.chat.id, result, parse_mode="Markdown", reply_markup=kb)
+
     # ══════════════════════════════════════════
     #  👤 الحسابات
     # ══════════════════════════════════════════
@@ -1475,12 +1692,16 @@ def setup_bot():
         connected = mgr_count()
         accounts = arun(db_get_all_accounts(active_only=False))
         total = len(accounts)
+        banned = sum(1 for a in accounts if a.get("is_banned"))
         text = (
-            f"{S.header('إدارة الحسابات', S.ACCOUNT)}\n\n"
-            f"{S.field('إجمالي الحسابات', total)}\n"
-            f"{S.field('متصل الآن', connected, S.ONLINE)}\n"
-            f"{S.field('منفصل', total-connected, S.OFFLINE)}\n\n"
-            f"اختر ما تريد 👇"
+            f"`╔══════════════════════════╗`\n"
+            f"`║  👤  إدارة الحسابات      ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"📊 الإجمالي:  `{total}`\n"
+            f"🟢 متصل:     `{connected}`\n"
+            f"🔴 منفصل:    `{total - connected - banned}`\n"
+            f"🚫 محظور:    `{banned}`\n\n"
+            f"_اختر ما تريد 👇_"
         )
         edit_or_send(call, text, kb_accounts_menu())
         bot.answer_callback_query(call.id)
@@ -1488,86 +1709,138 @@ def setup_bot():
     @bot.callback_query_handler(func=lambda c: c.data == "acc_list")
     def cb_acc_list(call: CallbackQuery):
         if not is_admin(call): return
-        accounts = arun(db_get_all_accounts(active_only=False))
-        if not accounts:
-            text = (
-                f"{S.header('الحسابات', S.ACCOUNT)}\n\n"
-                f"📭 _لا توجد حسابات مضافة_\n\n"
-                f"اضغط ➕ لإضافة حساب جديد"
+        bot.answer_callback_query(call.id, "⏳ جاري التحميل...")
+        try:
+            db_accounts = arun(db_get_all_accounts(active_only=False))
+        except Exception as e:
+            edit_or_send(call, f"❌ *خطأ في تحميل الحسابات:* `{e}`", kb_back("menu_accounts"))
+            return
+        db_ids = {a["id"] for a in db_accounts}
+        # أضف أي حساب في _clients غير موجود في DB (Session String ENV)
+        all_accounts = list(db_accounts)
+        for aid, ub in _clients.items():
+            if aid not in db_ids:
+                all_accounts.append({
+                    "id": aid,
+                    "phone": ub.phone,
+                    "full_name": ub.display_name(),
+                    "username": ub._me.username if ub._me else None,
+                    "is_banned": 0,
+                    "msg_count": 0,
+                    "join_count": 0,
+                })
+
+        if not all_accounts:
+            edit_or_send(call,
+                f"`╔══════════════════════════╗`\n"
+                f"`║  👤  الحسابات            ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"📭 _لا توجد حسابات مضافة بعد_\n\n"
+                f"اضغط ➕ لإضافة حساب جديد",
+                kb_accounts_menu()
             )
-            edit_or_send(call, text, kb_accounts_menu())
-            bot.answer_callback_query(call.id)
             return
 
-        lines = [f"{S.header('قائمة الحسابات', S.ACCOUNT)}\n"]
-        for a in accounts:
-            connected = mgr_is_connected(a["id"])
-            badge = S.status_badge(connected, bool(a["is_banned"]))
-            name = a.get("full_name") or a["phone"]
-            uname = f"@{a['username']}" if a.get("username") else ""
+        connected_count = sum(1 for a in all_accounts if mgr_is_connected(a["id"]))
+        lines = [
+            f"`╔══════════════════════════╗`",
+            f"`║  👤  قائمة الحسابات      ║`",
+            f"`╚══════════════════════════╝`\n",
+            f"📊 الإجمالي: `{len(all_accounts)}` | 🟢 متصل: `{connected_count}`\n",
+        ]
+        for a in all_accounts:
+            is_conn = mgr_is_connected(a["id"])
+            badge = "🟢" if is_conn else ("🚫" if a.get("is_banned") else "🔴")
+            raw_name = a.get("full_name") or a.get("phone", "—")
+            name = raw_name.replace("_", r"\_").replace("*", r"\*")
+            uname = f"  @{a['username']}" if a.get("username") else ""
+            env_tag = " 🔑" if str(a.get("phone","")).startswith(("ENV_SESSION_","BOT_SS_")) else ""
             lines.append(
-                f"\n{badge}\n"
-                f"  {S.ID} `{a['id']}` • *{name}* {uname}\n"
-                f"  {S.PHONE} `{a['phone']}`\n"
-                f"  {S.CHART} رسائل: `{a.get('msg_count',0)}` • انضمام: `{a.get('join_count',0)}`"
+                f"{badge} *{name}*{uname}{env_tag}\n"
+                f"  🆔 `{a['id']}` | 📱 `{str(a.get('phone','—'))[:20]}`\n"
+                f"  💬 `{a.get('msg_count',0)}` رسالة | 🔗 `{a.get('join_count',0)}` انضمام"
             )
 
-        kb = InlineKeyboardMarkup(row_width=3)
-        for a in accounts:
-            connected = mgr_is_connected(a["id"])
-            icon = "🟢" if connected else "🔴"
-            kb.add(InlineKeyboardButton(
-                f"{icon} {a.get('full_name') or a['phone'][:15]}",
-                callback_data=f"acc_detail_{a['id']}"
-            ))
-        kb.add(
+        kb = InlineKeyboardMarkup(row_width=2)
+        for a in all_accounts[:10]:
+            icon = "🟢" if mgr_is_connected(a["id"]) else ("🚫" if a.get("is_banned") else "🔴")
+            nm = (a.get("full_name") or a.get("phone","—"))[:18]
+            kb.add(InlineKeyboardButton(f"{icon} {nm}", callback_data=f"acc_detail_{a['id']}"))
+        kb.row(
             InlineKeyboardButton("➕ إضافة", callback_data="acc_add"),
+            InlineKeyboardButton("🔄 تحديث", callback_data="acc_list"),
             InlineKeyboardButton("◀️ رجوع",  callback_data="menu_accounts"),
         )
         edit_or_send(call, "\n".join(lines), kb)
-        bot.answer_callback_query(call.id)
 
     @bot.callback_query_handler(func=lambda c: c.data.startswith("acc_detail_"))
     def cb_acc_detail(call: CallbackQuery):
         if not is_admin(call): return
-        aid = int(call.data.split("_")[-1])
-        acc = arun(db_get_account(aid))
-        if not acc:
-            bot.answer_callback_query(call.id, "❌ الحساب غير موجود")
+        try:
+            aid = int(call.data.split("_", 2)[2])
+        except (IndexError, ValueError):
+            bot.answer_callback_query(call.id, "❌ بيانات خاطئة")
             return
-        ub = mgr_client(aid)
-        connected = mgr_is_connected(aid)
-        badge = S.status_badge(connected, bool(acc["is_banned"]))
-        text = (
-            f"{S.header('تفاصيل الحساب', S.ACCOUNT)}\n\n"
-            f"{S.ID} *ID:* `{acc['id']}`\n"
-            f"{S.ACCOUNT} *الاسم:* {acc.get('full_name','—')}\n"
-            f"{S.PHONE} *الهاتف:* `{acc['phone']}`\n"
-            f"{S.LINK} *يوزر:* {'@'+acc['username'] if acc.get('username') else '—'}\n\n"
-            f"`{'─'*22}`\n"
-            f"*الحالة:* {badge}\n"
-            f"*وقت الاتصال:* {ub.uptime() if ub else '—'}\n"
-            f"*إعادة اتصال:* `{ub.reconnect_count if ub else 0}` مرة\n\n"
-            f"`{'─'*22}`\n"
-            f"{S.CHART} *إحصائيات:*\n"
-            f"  رسائل مُرسلة: `{acc.get('msg_count',0)}`\n"
-            f"  انضمامات: `{acc.get('join_count',0)}`\n"
-            f"  أُضيف: {S.format_time(acc.get('created_at',''))}\n"
-            f"  آخر نشاط: {S.format_time(acc.get('last_used','')) if acc.get('last_used') else '—'}"
-        )
-        edit_or_send(call, text, kb_account_actions(aid))
-        bot.answer_callback_query(call.id)
+        try:
+            acc = arun(db_get_account(aid))
+            ub  = mgr_client(aid)
+            # لو مش في DB ابحث في الذاكرة (Session String ENV)
+            if not acc:
+                if ub:
+                    acc = {
+                        "id": aid, "phone": ub.phone,
+                        "full_name": ub.display_name(),
+                        "username": ub._me.username if ub._me else None,
+                        "is_banned": 0, "msg_count": 0, "join_count": 0,
+                        "created_at": "", "last_used": "",
+                    }
+                else:
+                    bot.answer_callback_query(call.id, "❌ الحساب غير موجود")
+                    edit_or_send(call, "❌ *الحساب غير موجود أو تم حذفه*", kb_back("acc_list"))
+                    return
+            connected = mgr_is_connected(aid)
+            badge     = "🟢 متصل" if connected else ("🚫 محظور" if acc.get("is_banned") else "🔴 منفصل")
+            text = (
+                f"`╔══════════════════════════╗`\n"
+                f"`║  👤  تفاصيل الحساب       ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"*الاسم:*   {acc.get('full_name','—')}\n"
+                f"*يوزر:*   {'@'+acc['username'] if acc.get('username') else '—'}\n"
+                f"*هاتف:*   `{acc['phone']}`\n"
+                f"*ID:*       `{acc['id']}`\n\n"
+                f"┌─ *الحالة* ───────────────\n"
+                f"│  {badge}\n"
+                f"│  ⏱️ Uptime: `{ub.uptime() if ub else '—'}`\n"
+                f"│  🔄 إعادة اتصال: `{ub.reconnect_count if ub else 0}` مرة\n"
+                f"└──────────────────────────\n\n"
+                f"📈 *الإحصائيات:*\n"
+                f"  💬 رسائل مُرسلة: `{acc.get('msg_count',0)}`\n"
+                f"  🔗 انضمامات:     `{acc.get('join_count',0)}`\n"
+                f"  📅 أُضيف: {S.format_time(acc.get('created_at',''))}\n"
+                f"  🕐 آخر نشاط: {S.format_time(acc.get('last_used','')) if acc.get('last_used') else '—'}"
+            )
+            edit_or_send(call, text, kb_account_actions(aid))
+            bot.answer_callback_query(call.id)
+        except Exception as e:
+            logger.error(f"cb_acc_detail error: {e}")
+            try:
+                bot.answer_callback_query(call.id, "❌ خطأ في تحميل بيانات الحساب")
+                edit_or_send(call,
+                    f"❌ *خطأ في تحميل الحساب* `#{aid}`\n\n`{e}`",
+                    kb_back("acc_list")
+                )
+            except Exception:
+                pass
 
     @bot.callback_query_handler(func=lambda c: c.data.startswith("acc_reconnect_"))
     def cb_acc_reconnect(call: CallbackQuery):
         if not is_admin(call): return
-        aid = int(call.data.split("_")[-1])
+        aid = int(call.data.split("_", 2)[2])
         bot.answer_callback_query(call.id, "🔄 جاري إعادة الاتصال...")
         acc = arun(db_get_account(aid))
         if not acc:
-            bot.send_message(call.message.chat.id, "❌ الحساب غير موجود")
+            bot.send_message(call.message.chat.id, "❌ *الحساب غير موجود*", parse_mode="Markdown")
             return
-        # إيقاف القديم وإعادة تشغيله
         async def _reconnect():
             if aid in _clients:
                 await _clients[aid].disconnect()
@@ -1575,15 +1848,17 @@ def setup_bot():
                 _actions.pop(aid, None)
             return await _start_acc(acc)
         ok = arun(_reconnect())
-        if ok:
-            bot.send_message(call.message.chat.id, f"✅ *الحساب `{aid}` أُعيد اتصاله بنجاح!*", parse_mode="Markdown")
-        else:
-            bot.send_message(call.message.chat.id, f"❌ *فشل إعادة الاتصال للحساب `{aid}`*", parse_mode="Markdown")
+        bot.send_message(
+            call.message.chat.id,
+            f"✅ *الحساب `#{aid}` أُعيد اتصاله بنجاح!*" if ok
+            else f"❌ *فشل إعادة الاتصال للحساب `#{aid}`*",
+            parse_mode="Markdown"
+        )
 
     @bot.callback_query_handler(func=lambda c: c.data.startswith("acc_dialogs_"))
     def cb_acc_dialogs(call: CallbackQuery):
         if not is_admin(call): return
-        aid = int(call.data.split("_")[-1])
+        aid = int(call.data.split("_", 2)[2])
         actions = mgr_actions(aid)
         if not actions:
             bot.answer_callback_query(call.id, "❌ الحساب غير متصل")
@@ -1591,46 +1866,54 @@ def setup_bot():
         bot.answer_callback_query(call.id, "⏳ جاري التحميل...")
         dialogs = arun(actions.get_dialogs(20))
         if not dialogs:
-            edit_or_send(call, "📭 _لا توجد محادثات_", kb_back(f"acc_detail_{aid}"))
+            edit_or_send(call,
+                f"`╔══════════════════════════╗`\n"
+                f"`║  💬  المحادثات            ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"📭 _لا توجد محادثات_",
+                kb_back(f"acc_detail_{aid}")
+            )
             return
-        lines = [f"{S.header(f'محادثات الحساب {aid}', S.GROUP)}\n"]
+        lines = [
+            f"`╔══════════════════════════╗`",
+            f"`║  💬  محادثات #{aid}         ║`",
+            f"`╚══════════════════════════╝`\n",
+        ]
         for d in dialogs[:20]:
-            name = getattr(d.entity,"title",None) or getattr(d.entity,"first_name","؟")
-            eid  = d.entity.id
-            uname = f"@{d.entity.username}" if getattr(d.entity,"username",None) else ""
-            lines.append(f"• `{eid}` *{name}* {uname}")
-        edit_or_send(call, "\n".join(lines), kb_back(f"acc_detail_{aid}"))
-
-    @bot.callback_query_handler(func=lambda c: c.data.startswith("acc_tasks_"))
-    def cb_acc_tasks(call: CallbackQuery):
-        if not is_admin(call): return
-        aid = int(call.data.split("_")[-1])
-        tasks = arun(db_get_all_tasks(account_id=aid))
-        if not tasks:
-            edit_or_send(call, f"📭 _لا توجد مهام للحساب {aid}_", kb_back(f"acc_detail_{aid}"))
-            return
-        lines = [f"{S.header(f'مهام الحساب {aid}', S.TASK)}\n"]
-        for t in tasks:
-            icon = S.task_type_icon(t["task_type"])
-            lines.append(f"{icon} `{t['id']}` *{t['name']}* → `{t['target']}`")
+            name  = getattr(d.entity,"title",None) or getattr(d.entity,"first_name","؟")
+            eid   = d.entity.id
+            uname = f"  @{d.entity.username}" if getattr(d.entity,"username",None) else ""
+            lines.append(f"• `{eid}` *{name}*{uname}")
         edit_or_send(call, "\n".join(lines), kb_back(f"acc_detail_{aid}"))
 
     @bot.callback_query_handler(func=lambda c: c.data.startswith("acc_delete_"))
     def cb_acc_delete(call: CallbackQuery):
         if not is_admin(call): return
-        aid = int(call.data.split("_")[-1])
+        aid = int(call.data.split("_", 2)[2])
         edit_or_send(
             call,
-            f"⚠️ *هل تريد حذف الحساب `{aid}` نهائيًا؟*\n\n_سيتم حذف جميع مهامه وجداوله أيضًا!_",
+            f"`╔══════════════════════════╗`\n"
+            f"`║  ⚠️  تأكيد الحذف          ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"هل تريد حذف الحساب `#{aid}` نهائيًا؟\n\n"
+            f"_سيتم حذف جميع مهامه وجداوله أيضًا!_",
             kb_confirm(f"acc_confirm_delete_{aid}", "acc_list")
         )
         bot.answer_callback_query(call.id)
 
     @bot.callback_query_handler(func=lambda c: c.data.startswith("acc_confirm_delete_"))
     def cb_acc_confirm_delete(call: CallbackQuery):
-        aid = int(call.data.split("_")[-1])
+        if not is_admin(call): return
+        try:
+            aid = int(call.data.split("_", 3)[3])
+        except (ValueError, IndexError):
+            bot.answer_callback_query(call.id, "❌ بيانات خاطئة")
+            return
         arun(mgr_remove(aid))
-        edit_or_send(call, f"✅ *تم حذف الحساب `{aid}` بنجاح*", kb_back("acc_list"))
+        edit_or_send(call,
+            f"✅ *تم حذف الحساب `#{aid}` بنجاح*",
+            kb_back("acc_list")
+        )
         bot.answer_callback_query(call.id, "✅ تم الحذف")
 
     @bot.callback_query_handler(func=lambda c: c.data == "acc_stats")
@@ -1638,17 +1921,25 @@ def setup_bot():
         if not is_admin(call): return
         statuses = mgr_all_status()
         if not statuses:
-            edit_or_send(call, "📭 _لا توجد حسابات_", kb_back("menu_accounts"))
+            edit_or_send(call,
+                f"`╔══════════════════════════╗`\n"
+                f"`║  📊  حالة الحسابات        ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"📭 _لا توجد حسابات_",
+                kb_back("menu_accounts")
+            )
             bot.answer_callback_query(call.id)
             return
-        lines = [f"{S.header('حالة الحسابات', S.CHART)}\n"]
+        lines = [
+            f"`╔══════════════════════════╗`",
+            f"`║  📊  حالة الحسابات        ║`",
+            f"`╚══════════════════════════╝`\n",
+        ]
         for s in statuses:
             icon = "🟢" if s["connected"] else "🔴"
-            bar  = S.progress_bar(1 if s["connected"] else 0, 1, 5)
             lines.append(
-                f"\n{icon} *{s['name']}*\n"
-                f"  ⏱ Uptime: `{s['uptime']}`\n"
-                f"  🔄 Reconnects: `{s['reconnects']}`"
+                f"{icon} *{s['name']}*\n"
+                f"  ⏱️ Uptime: `{s['uptime']}` | 🔄 Reconnects: `{s['reconnects']}`"
             )
         edit_or_send(call, "\n".join(lines), kb_back("menu_accounts"))
         bot.answer_callback_query(call.id)
@@ -1661,21 +1952,177 @@ def setup_bot():
         uid = call.from_user.id
         set_state(uid, {"step":"acc_phone"})
         edit_or_send(call,
-            f"{S.header('إضافة حساب جديد', S.NEW)}\n\n"
-            f"{S.PHONE} أرسل رقم الهاتف بالصيغة الدولية:\n\n"
+            f"`╔══════════════════════════╗`\n"
+            f"`║  👤  إضافة حساب - 1/3    ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"📱 أرسل رقم الهاتف بالصيغة الدولية:\n\n"
             f"مثال: `+201012345678`\n\n"
             f"_أو اضغط إلغاء_",
             kb_back("menu_accounts")
         )
         bot.answer_callback_query(call.id)
 
+    # ══════════════════════════════════════════
+    #  🔑 إضافة حساب بـ Session String مباشرة
+    # ══════════════════════════════════════════
+
+    @bot.callback_query_handler(func=lambda c: c.data == "acc_add_ss")
+    def cb_acc_add_ss(call: CallbackQuery):
+        if not is_admin(call): return
+        uid = call.from_user.id
+        set_state(uid, {"step": "acc_ss_input"})
+        edit_or_send(call,
+            f"`╔══════════════════════════╗`\n"
+            f"`║  🔑  إضافة بـ Session     ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"📋 أرسل الـ *Session String* مباشرة\n\n"
+            f"_هو نص طويل تحصل عليه من `Pyrogram`، `Telethon`، أو أدوات توليد الجلسات_\n\n"
+            f"⚠️ لا تشارك هذا المفتاح مع أي أحد غيرك\n\n"
+            f"_أو اضغط إلغاء_",
+            kb_back("menu_accounts")
+        )
+        bot.answer_callback_query(call.id)
+
+    @bot.message_handler(func=lambda m: in_state(m.from_user.id, "acc_ss_input"))
+    def acc_step_ss_input(msg: Message):
+        if not is_admin(msg): return
+        uid = msg.from_user.id
+        ss  = msg.text.strip()
+        clear_state(uid)
+
+        # احذف رسالة الـ session string فوراً للأمان
+        try:
+            bot.delete_message(msg.chat.id, msg.message_id)
+        except Exception:
+            pass
+
+        m = bot.send_message(msg.chat.id,
+            f"`╔══════════════════════════╗`\n"
+            f"`║  🔑  جاري الاتصال...      ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"⏳ _جاري التحقق من الـ Session String..._",
+            parse_mode="Markdown"
+        )
+
+        result = arun(load_session_from_bot(ss, added_by=uid))
+
+        if result["status"] == "success":
+            kb = InlineKeyboardMarkup(row_width=2)
+            kb.add(
+                InlineKeyboardButton("👤 تفاصيل الحساب", callback_data=f"acc_detail_{result['account_id']}"),
+                InlineKeyboardButton("◀️ الحسابات",       callback_data="acc_list"),
+            )
+            bot.edit_message_text(
+                f"`╔══════════════════════════╗`\n"
+                f"`║  ✅  تم إضافة الحساب!    ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"👤 *الاسم:*  {result['name']}\n"
+                f"🔗 *يوزر:* {'@'+result['username'] if result.get('username') else '—'}\n"
+                f"📱 *هاتف:*  `{result.get('phone','—')}`\n"
+                f"🆔 *ID:*     `{result['account_id']}`\n\n"
+                f"🚀 _الحساب متصل وجاهز للاستخدام!_",
+                m.chat.id, m.message_id,
+                parse_mode="Markdown", reply_markup=kb
+            )
+        elif result["status"] == "duplicate":
+            kb = InlineKeyboardMarkup()
+            kb.add(InlineKeyboardButton("👤 عرض الحساب", callback_data=f"acc_detail_{result['account_id']}"))
+            bot.edit_message_text(
+                f"`╔══════════════════════════╗`\n"
+                f"`║  ⚠️  جلسة مكررة           ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"هذه الجلسة مضافة مسبقاً:\n"
+                f"👤 *{result['name']}* `#{result['account_id']}`",
+                m.chat.id, m.message_id,
+                parse_mode="Markdown", reply_markup=kb
+            )
+        else:
+            bot.edit_message_text(
+                f"`╔══════════════════════════╗`\n"
+                f"`║  ❌  فشل الإضافة          ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"*السبب:*\n_{result.get('message','خطأ غير معروف')}_\n\n"
+                f"تأكد أن الـ Session String:\n"
+                f"• صحيحة وغير منتهية\n"
+                f"• من حساب Telegram فعّال\n"
+                f"• ليست محظورة",
+                m.chat.id, m.message_id,
+                parse_mode="Markdown",
+                reply_markup=kb_back("menu_accounts")
+            )
+
+    @bot.message_handler(commands=["addsession"])
+    def cmd_addsession(msg: Message):
+        """إضافة حساب بـ Session String عبر أمر نصي مباشر"""
+        if not is_admin(msg): return
+        parts = msg.text.split(maxsplit=1)
+
+        # احذف الرسالة فوراً للأمان
+        try:
+            bot.delete_message(msg.chat.id, msg.message_id)
+        except Exception:
+            pass
+
+        if len(parts) < 2 or len(parts[1].strip()) < 50:
+            return bot.send_message(msg.chat.id,
+                f"`╔══════════════════════════╗`\n"
+                f"`║  🔑  إضافة بـ Session     ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"*الاستخدام:*\n`/addsession <session_string>`\n\n"
+                f"أو استخدم زر *🔑 إضافة بـ Session* من قائمة الحسابات",
+                parse_mode="Markdown",
+                reply_markup=kb_back("menu_accounts")
+            )
+
+        ss = parts[1].strip()
+        m  = bot.send_message(msg.chat.id,
+            f"⏳ _جاري التحقق من الـ Session String..._",
+            parse_mode="Markdown"
+        )
+        result = arun(load_session_from_bot(ss, added_by=msg.from_user.id))
+
+        if result["status"] == "success":
+            kb = InlineKeyboardMarkup(row_width=2)
+            kb.add(
+                InlineKeyboardButton("👤 تفاصيل الحساب", callback_data=f"acc_detail_{result['account_id']}"),
+                InlineKeyboardButton("◀️ الحسابات",       callback_data="acc_list"),
+            )
+            bot.edit_message_text(
+                f"`╔══════════════════════════╗`\n"
+                f"`║  ✅  تم إضافة الحساب!    ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"👤 *{result['name']}*\n"
+                f"🔗 {'@'+result['username'] if result.get('username') else '—'}\n"
+                f"📱 `{result.get('phone','—')}`\n"
+                f"🆔 `{result['account_id']}`\n\n"
+                f"🚀 _متصل وجاهز!_",
+                m.chat.id, m.message_id,
+                parse_mode="Markdown", reply_markup=kb
+            )
+        elif result["status"] == "duplicate":
+            bot.edit_message_text(
+                f"⚠️ *جلسة مكررة* — مضافة مسبقاً\n"
+                f"👤 *{result['name']}* `#{result['account_id']}`",
+                m.chat.id, m.message_id, parse_mode="Markdown",
+                reply_markup=InlineKeyboardMarkup().add(
+                    InlineKeyboardButton("👤 عرض", callback_data=f"acc_detail_{result['account_id']}")
+                )
+            )
+        else:
+            bot.edit_message_text(
+                f"❌ *فشل:* _{result.get('message','خطأ')}_",
+                m.chat.id, m.message_id, parse_mode="Markdown",
+                reply_markup=kb_back("menu_accounts")
+            )
     @bot.message_handler(commands=["addaccount"])
     def cmd_addacc(msg: Message):
         if not is_admin(msg): return
         set_state(msg.from_user.id, {"step":"acc_phone"})
         bot.send_message(msg.chat.id,
-            f"{S.header('إضافة حساب جديد', S.NEW)}\n\n"
-            f"{S.PHONE} أرسل رقم الهاتف:\n`+201012345678`",
+            f"`╔══════════════════════════╗`\n"
+            f"`║  👤  إضافة حساب - 1/3    ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"📱 أرسل رقم الهاتف:\n`+201012345678`",
             parse_mode="Markdown"
         )
 
@@ -1683,12 +2130,14 @@ def setup_bot():
     def acc_step_phone(msg: Message):
         p = msg.text.strip()
         if not p.startswith("+") or not p[1:].replace(" ","").isdigit():
-            return bot.reply_to(msg, "❌ صيغة خاطئة. مثال: `+201012345678`", parse_mode="Markdown")
+            return bot.reply_to(msg, "❌ صيغة خاطئة.\nمثال: `+201012345678`", parse_mode="Markdown")
         _states[msg.from_user.id]["phone"] = p
         _states[msg.from_user.id]["step"]  = "acc_api_id"
         bot.send_message(msg.chat.id,
-            f"{S.header('API ID', S.KEY)}\n\n"
-            f"روح *my.telegram.org* وأرسل الـ *API ID*\n\n"
+            f"`╔══════════════════════════╗`\n"
+            f"`║  👤  إضافة حساب - 2/3    ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"🔑 روح *my.telegram.org* وأرسل الـ *API ID*\n\n"
             f"_رقم مكون من أرقام فقط_",
             parse_mode="Markdown"
         )
@@ -1698,13 +2147,15 @@ def setup_bot():
         try:
             api_id = int(msg.text.strip())
         except ValueError:
-            return bot.reply_to(msg, "❌ API ID يجب أن يكون رقمًا فقط")
+            return bot.reply_to(msg, "❌ API ID يجب أن يكون أرقاماً فقط")
         _states[msg.from_user.id]["api_id"] = api_id
         _states[msg.from_user.id]["step"]   = "acc_api_hash"
         bot.send_message(msg.chat.id,
-            f"{S.header('API Hash', S.LOCK)}\n\n"
-            f"أرسل الـ *API Hash*\n\n"
-            f"_سلسلة حروف وأرقام_",
+            f"`╔══════════════════════════╗`\n"
+            f"`║  👤  إضافة حساب - 3/3    ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"🔐 أرسل الـ *API Hash*\n\n"
+            f"_سلسلة حروف وأرقام من my.telegram.org_",
             parse_mode="Markdown"
         )
 
@@ -1717,9 +2168,12 @@ def setup_bot():
         result = arun(mgr_begin_login(state["phone"], state["api_id"], state["api_hash"]))
         if result["status"] == "code_sent":
             bot.send_message(msg.chat.id,
-                f"📨 *تم إرسال كود التحقق!*\n\n"
-                f"{S.PHONE} إلى: `{state['phone']}`\n\n"
-                f"أرسل الكود هنا 👇",
+                f"`╔══════════════════════════╗`\n"
+                f"`║  📨  كود التحقق           ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"✅ تم إرسال الكود إلى:\n`{state['phone']}`\n\n"
+                f"📲 أرسل الكود هنا 👇\n"
+                f"_شكله: `12345` أو `1 2 3 4 5`_",
                 parse_mode="Markdown"
             )
         else:
@@ -1731,17 +2185,18 @@ def setup_bot():
         uid   = msg.from_user.id
         state = _states[uid]
         code  = msg.text.strip().replace(" ","").replace("-","")
+        state["code"] = code  # حفظ الكود للـ 2FA
         result = arun(mgr_complete_login(state["phone"], code))
         if result["status"] == "success":
             clear_state(uid)
             aid = result["account_id"]
             bot.send_message(msg.chat.id,
-                f"`{'━'*28}`\n"
-                f"  ✅ *تم تسجيل الدخول بنجاح!*\n"
-                f"`{'━'*28}`\n\n"
-                f"{S.ACCOUNT} *الاسم:* {result['name']}\n"
-                f"{S.ID} *الـ ID:* `{aid}`\n"
-                f"{S.LINK} *يوزر:* {'@'+result['username'] if result.get('username') else '—'}\n\n"
+                f"`╔══════════════════════════╗`\n"
+                f"`║  ✅  تم تسجيل الدخول!    ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"👤 *الاسم:*  {result['name']}\n"
+                f"🆔 *ID:*     `{aid}`\n"
+                f"🔗 *يوزر:*  {'@'+result['username'] if result.get('username') else '—'}\n\n"
                 f"🎉 _الحساب جاهز للاستخدام!_",
                 parse_mode="Markdown",
                 reply_markup=kb_back("menu_accounts")
@@ -1749,7 +2204,10 @@ def setup_bot():
         elif result["status"] == "need_2fa":
             _states[uid]["step"] = "acc_2fa"
             bot.send_message(msg.chat.id,
-                f"{S.LOCK} *التحقق الثنائي (2FA)*\n\nأرسل كلمة المرور:",
+                f"`╔══════════════════════════╗`\n"
+                f"`║  🔐  التحقق الثنائي 2FA  ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"أرسل كلمة مرور الـ 2FA:",
                 parse_mode="Markdown"
             )
         else:
@@ -1766,7 +2224,7 @@ def setup_bot():
         clear_state(uid)
         if result["status"] == "success":
             bot.send_message(msg.chat.id,
-                f"✅ *تم! مرحبًا {result['name']}*\n{S.ID} `{result['account_id']}`",
+                f"✅ *مرحبًا {result['name']}!*\n🆔 `{result['account_id']}`",
                 parse_mode="Markdown", reply_markup=kb_back("menu_accounts")
             )
         else:
@@ -1779,77 +2237,103 @@ def setup_bot():
     @bot.callback_query_handler(func=lambda c: c.data == "menu_tasks")
     def cb_menu_tasks(call: CallbackQuery):
         if not is_admin(call): return
-        tasks = arun(db_get_all_tasks())
+        try:
+            tasks = arun(db_get_all_tasks())
+        except Exception as e:
+            edit_or_send(call, f"❌ *خطأ في تحميل المهام:* `{e}`", kb_back("back_main"))
+            bot.answer_callback_query(call.id)
+            return
+        type_counts = {}
+        for t in tasks:
+            type_counts[t["task_type"]] = type_counts.get(t["task_type"], 0) + 1
         text = (
-            f"{S.header('إدارة المهام', S.TASK)}\n\n"
-            f"{S.field('إجمالي المهام', len(tasks))}\n\n"
-            f"اختر ما تريد 👇"
+            f"`╔══════════════════════════╗`\n"
+            f"`║  ⚙️  إدارة المهام         ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"📊 إجمالي المهام: `{len(tasks)}`\n"
         )
+        if type_counts:
+            text += "\n*التوزيع:*\n"
+            for tt, cnt in type_counts.items():
+                text += f"  {S.task_type_icon(tt)} {S.task_type_ar(tt)}: `{cnt}`\n"
+        text += "\n_اختر ما تريد 👇_"
         edit_or_send(call, text, kb_tasks_menu())
         bot.answer_callback_query(call.id)
 
     @bot.callback_query_handler(func=lambda c: c.data == "task_list")
     def cb_task_list(call: CallbackQuery):
         if not is_admin(call): return
-        tasks = arun(db_get_all_tasks())
-        if not tasks:
-            text = (
-                f"{S.header('المهام', S.TASK)}\n\n"
-                f"📭 _لا توجد مهام_\n\nاضغط ➕ لإنشاء مهمة"
-            )
-            edit_or_send(call, text, kb_tasks_menu())
-            bot.answer_callback_query(call.id)
+        bot.answer_callback_query(call.id, "⏳ جاري التحميل...")
+        try:
+            tasks = arun(db_get_all_tasks())
+        except Exception as e:
+            edit_or_send(call, f"❌ *خطأ:* `{e}`", kb_back("menu_tasks"))
             return
-        lines = [f"{S.header('قائمة المهام', S.TASK)}\n"]
+        if not tasks:
+            edit_or_send(call,
+                f"`╔══════════════════════════╗`\n"
+                f"`║  ⚙️  المهام               ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"📭 _لا توجد مهام بعد_\n\nاضغط ➕ لإنشاء مهمة",
+                kb_tasks_menu()
+            )
+            return
+        lines = [
+            f"`╔══════════════════════════╗`",
+            f"`║  ⚙️  قائمة المهام         ║`",
+            f"`╚══════════════════════════╝`\n",
+        ]
         for t in tasks:
             icon  = S.task_type_icon(t["task_type"])
             tname = S.task_type_ar(t["task_type"])
-            acc   = t.get("full_name") or t.get("phone","?")
+            acc   = t.get("full_name") or t.get("phone", "?")
             lines.append(
-                f"\n{icon} `{t['id']}` *{t['name']}*\n"
-                f"  📱 {acc} → `{t['target']}`\n"
-                f"  🏷 {tname} • تُنفّذ: `{t.get('run_count',0)}` مرة"
+                f"{icon} *{t['name']}* `#{t['id']}`\n"
+                f"  👤 {acc} → `{t['target'][:25]}`\n"
+                f"  🏷️ {tname} | ▶️ `{t.get('run_count',0)}` مرة"
             )
         kb = InlineKeyboardMarkup(row_width=2)
         for t in tasks[:8]:
             icon = S.task_type_icon(t["task_type"])
             kb.add(InlineKeyboardButton(
-                f"{icon} {t['name'][:20]}",
+                f"{icon} {t['name'][:20]} #{t['id']}",
                 callback_data=f"task_detail_{t['id']}"
             ))
-        kb.add(
+        kb.row(
             InlineKeyboardButton("➕ جديد",  callback_data="task_add"),
-            InlineKeyboardButton("◀️ رجوع", callback_data="menu_tasks"),
+            InlineKeyboardButton("🔄 تحديث", callback_data="task_list"),
+            InlineKeyboardButton("◀️ رجوع",  callback_data="menu_tasks"),
         )
         edit_or_send(call, "\n".join(lines), kb)
-        bot.answer_callback_query(call.id)
 
     @bot.callback_query_handler(func=lambda c: c.data.startswith("task_detail_"))
     def cb_task_detail(call: CallbackQuery):
         if not is_admin(call): return
-        tid  = int(call.data.split("_")[-1])
+        tid  = int(call.data.split("_", 2)[2])
         task = arun(db_get_task(tid))
         if not task:
             bot.answer_callback_query(call.id, "❌ المهمة غير موجودة")
             return
-        acc = arun(db_get_account(task["account_id"]))
+        acc  = arun(db_get_account(task["account_id"]))
         icon = S.task_type_icon(task["task_type"])
         text = (
-            f"{S.header('تفاصيل المهمة', icon)}\n\n"
-            f"{S.ID} *ID:* `{task['id']}`\n"
-            f"✏️ *الاسم:* {task['name']}\n"
-            f"🏷 *النوع:* {S.task_type_ar(task['task_type'])}\n"
-            f"🎯 *الهدف:* `{task['target']}`\n"
-            f"📱 *الحساب:* {acc.get('full_name','?') if acc else '?'} (`{task['account_id']}`)\n\n"
-            f"`{'─'*22}`\n"
+            f"`╔══════════════════════════╗`\n"
+            f"`║  {icon}  تفاصيل المهمة       ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"*الاسم:*    {task['name']}\n"
+            f"*النوع:*    {S.task_type_ar(task['task_type'])}\n"
+            f"*الهدف:*    `{task['target']}`\n"
+            f"*الحساب:*  {acc.get('full_name','?') if acc else '?'} `#{task['account_id']}`\n"
+            f"*ID:*        `{task['id']}`\n"
         )
         if task.get("content"):
-            preview = task["content"][:100] + ("..." if len(task["content"])>100 else "")
-            text += f"📝 *المحتوى:*\n`{preview}`\n\n"
+            preview = task["content"][:100] + ("..." if len(task["content"]) > 100 else "")
+            text += f"\n📝 *المحتوى:*\n`{preview}`\n"
         text += (
-            f"{S.CHART} *الإحصائيات:*\n"
-            f"  تنفيذات: `{task.get('run_count',0)}`\n"
-            f"  أُنشئت: {S.format_time(task.get('created_at',''))}"
+            f"\n┌─ *إحصائيات* ─────────────\n"
+            f"│  ▶️ تنفيذات: `{task.get('run_count',0)}`\n"
+            f"│  📅 أُنشئت: {S.format_time(task.get('created_at',''))}\n"
+            f"└──────────────────────────"
         )
         edit_or_send(call, text, kb_task_actions(tid))
         bot.answer_callback_query(call.id)
@@ -1857,7 +2341,7 @@ def setup_bot():
     @bot.callback_query_handler(func=lambda c: c.data.startswith("task_run_"))
     def cb_task_run(call: CallbackQuery):
         if not is_admin(call): return
-        tid  = int(call.data.split("_")[-1])
+        tid  = int(call.data.split("_", 2)[2])
         task = arun(db_get_task(tid))
         if not task:
             bot.answer_callback_query(call.id, "❌ المهمة غير موجودة")
@@ -1877,32 +2361,50 @@ def setup_bot():
             return False
 
         ok = arun(_run())
+        icon = S.task_type_icon(task["task_type"])
         result_text = (
-            f"✅ *المهمة `{tid}` نُفّذت بنجاح!*\n"
-            f"🎯 الهدف: `{task['target']}`"
+            f"✅ *تم التنفيذ بنجاح!*\n\n"
+            f"{icon} *{task['name']}* `#{tid}`\n"
+            f"🎯 `{task['target']}`"
         ) if ok else (
-            f"❌ *فشل تنفيذ المهمة `{tid}`*\n"
-            f"🎯 الهدف: `{task['target']}`"
+            f"❌ *فشل التنفيذ!*\n\n"
+            f"{icon} *{task['name']}* `#{tid}`\n"
+            f"🎯 `{task['target']}`\n"
+            f"_تحقق من الحساب والهدف_"
+        )
+        kb = InlineKeyboardMarkup(row_width=2)
+        kb.add(
+            InlineKeyboardButton("▶️ تشغيل مجدداً", callback_data=f"task_run_{tid}"),
+            InlineKeyboardButton("◀️ المهام",        callback_data="task_list"),
         )
         try:
-            bot.edit_message_text(result_text, m.chat.id, m.message_id, parse_mode="Markdown")
+            bot.edit_message_text(result_text, m.chat.id, m.message_id, parse_mode="Markdown", reply_markup=kb)
         except Exception:
-            bot.send_message(call.message.chat.id, result_text, parse_mode="Markdown")
+            bot.send_message(call.message.chat.id, result_text, parse_mode="Markdown", reply_markup=kb)
 
     @bot.callback_query_handler(func=lambda c: c.data.startswith("task_delete_"))
     def cb_task_delete(call: CallbackQuery):
         if not is_admin(call): return
-        tid = int(call.data.split("_")[-1])
+        tid = int(call.data.split("_", 2)[2])
         edit_or_send(
             call,
-            f"⚠️ *حذف المهمة `{tid}`؟*\n\n_سيتم حذف جداولها أيضًا!_",
+            f"`╔══════════════════════════╗`\n"
+            f"`║  ⚠️  تأكيد الحذف          ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"هل تريد حذف المهمة `#{tid}` نهائيًا؟\n\n"
+            f"_سيتم حذف جداولها أيضًا!_",
             kb_confirm(f"task_confirm_delete_{tid}", "task_list")
         )
         bot.answer_callback_query(call.id)
 
     @bot.callback_query_handler(func=lambda c: c.data.startswith("task_confirm_delete_"))
     def cb_task_confirm_delete(call: CallbackQuery):
-        tid = int(call.data.split("_")[-1])
+        if not is_admin(call): return
+        try:
+            tid = int(call.data.split("_", 3)[3])
+        except (ValueError, IndexError):
+            bot.answer_callback_query(call.id, "❌ بيانات خاطئة")
+            return
         arun(db_delete_task(tid))
         edit_or_send(call, f"✅ *تم حذف المهمة `{tid}` بنجاح*", kb_back("task_list"))
         bot.answer_callback_query(call.id, "✅ تم الحذف")
@@ -1914,22 +2416,29 @@ def setup_bot():
         if not is_admin(call): return
         accounts = mgr_get_all_for_task()
         if not accounts:
-            edit_or_send(call, "❌ *لا توجد حسابات نشطة*\nأضف حسابًا أولًا أو تحقق من SESSION_ في متغيرات البيئة", kb_back("menu_accounts"))
+            edit_or_send(call,
+                f"`╔══════════════════════════╗`\n"
+                f"`║  ❌  لا توجد حسابات       ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"_أضف حسابًا أولاً أو تحقق من SESSION_ في متغيرات البيئة_",
+                kb_back("menu_accounts")
+            )
             bot.answer_callback_query(call.id)
             return
         uid = call.from_user.id
         set_state(uid, {"step":"task_account"})
         kb = InlineKeyboardMarkup(row_width=1)
         for a in accounts:
-            icon = "🟢"
             kb.add(InlineKeyboardButton(
-                f"{icon} {a.get('full_name') or a['phone']} (#{a['id']})",
+                f"🟢 {a.get('full_name') or a['phone']} (#{a['id']})",
                 callback_data=f"task_acc_pick_{a['id']}"
             ))
         kb.add(InlineKeyboardButton("❌ إلغاء", callback_data="cancel"))
         edit_or_send(call,
-            f"{S.header('مهمة جديدة - الخطوة 1/4', S.NEW)}\n\n"
-            f"{S.ACCOUNT} اختر الحساب 👇",
+            f"`╔══════════════════════════╗`\n"
+            f"`║  ⚙️  مهمة جديدة - 1/4    ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"👤 اختر الحساب 👇",
             kb
         )
         bot.answer_callback_query(call.id)
@@ -1944,13 +2453,15 @@ def setup_bot():
         set_state(uid, {"step":"task_account"})
         kb = InlineKeyboardMarkup(row_width=1)
         for a in accounts:
-            icon = "🟢"
             kb.add(InlineKeyboardButton(
-                f"{icon} {a.get('full_name') or a['phone']} (#{a['id']})",
+                f"🟢 {a.get('full_name') or a['phone']} (#{a['id']})",
                 callback_data=f"task_acc_pick_{a['id']}"
             ))
         bot.send_message(msg.chat.id,
-            f"{S.header('مهمة جديدة', S.NEW)}\n\n{S.ACCOUNT} اختر الحساب:",
+            f"`╔══════════════════════════╗`\n"
+            f"`║  ⚙️  مهمة جديدة - 1/4    ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"👤 اختر الحساب:",
             parse_mode="Markdown", reply_markup=kb
         )
 
@@ -1958,20 +2469,23 @@ def setup_bot():
     def cb_task_acc_pick(call: CallbackQuery):
         uid = call.from_user.id
         if not get_state(uid): return
-        aid = int(call.data.split("_")[-1])
+        # "task_acc_pick_5" → split("_", 3) → ["task","acc","pick","5"] → [3]="5"
+        aid = int(call.data.split("_", 3)[3])
         _states[uid]["account_id"] = aid
         _states[uid]["step"]       = "task_type"
         kb = InlineKeyboardMarkup(row_width=2)
         kb.add(
             InlineKeyboardButton("💬 إرسال رسالة",  callback_data="task_type_pick_send_message"),
-            InlineKeyboardButton("👥 انضمام لجروب", callback_data="task_type_pick_join_group"),
+            InlineKeyboardButton("🔗 انضمام لجروب", callback_data="task_type_pick_join_group"),
             InlineKeyboardButton("🚪 مغادرة جروب",  callback_data="task_type_pick_leave_group"),
             InlineKeyboardButton("↪️ إعادة توجيه",  callback_data="task_type_pick_forward"),
             InlineKeyboardButton("❌ إلغاء",         callback_data="cancel"),
         )
         edit_or_send(call,
-            f"{S.header('مهمة جديدة - الخطوة 2/4', S.TASK)}\n\n"
-            f"⚙️ اختر *نوع* المهمة 👇",
+            f"`╔══════════════════════════╗`\n"
+            f"`║  ⚙️  مهمة جديدة - 2/4    ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"اختر *نوع* المهمة 👇",
             kb
         )
         bot.answer_callback_query(call.id)
@@ -1980,11 +2494,13 @@ def setup_bot():
     def cb_task_type_pick(call: CallbackQuery):
         uid = call.from_user.id
         if not get_state(uid): return
-        ttype = call.data.replace("task_type_pick_","")
+        ttype = "_".join(call.data.split("_")[3:])
         _states[uid]["task_type"] = ttype
         _states[uid]["step"]      = "task_name"
         edit_or_send(call,
-            f"{S.header('مهمة جديدة - الخطوة 3/4', S.EDIT)}\n\n"
+            f"`╔══════════════════════════╗`\n"
+            f"`║  ⚙️  مهمة جديدة - 3/4    ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
             f"✏️ أرسل *اسمًا* للمهمة\n\n"
             f"_مثال: إرسال إعلان يومي_",
         )
@@ -1996,9 +2512,11 @@ def setup_bot():
         _states[uid]["name"] = msg.text.strip()
         _states[uid]["step"] = "task_target"
         bot.send_message(msg.chat.id,
-            f"{S.header('مهمة جديدة - الخطوة 4/4', S.PIN)}\n\n"
+            f"`╔══════════════════════════╗`\n"
+            f"`║  ⚙️  مهمة جديدة - 4/4    ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
             f"🎯 أرسل *الهدف*\n\n"
-            f"• Username: `@groupname`\n"
+            f"• يوزر: `@groupname`\n"
             f"• Chat ID: `-1001234567890`\n"
             f"• رابط دعوة: `t.me/+xxxxx`",
             parse_mode="Markdown"
@@ -2040,23 +2558,23 @@ def setup_bot():
             icon = S.task_type_icon(state["task_type"])
             kb = InlineKeyboardMarkup(row_width=2)
             kb.add(
-                InlineKeyboardButton("▶️ تشغيل الآن",  callback_data=f"task_run_{tid}"),
-                InlineKeyboardButton("📅 جدولة",        callback_data=f"task_sched_{tid}"),
-                InlineKeyboardButton("📋 المهام",       callback_data="task_list"),
+                InlineKeyboardButton("▶️ تشغيل الآن", callback_data=f"task_run_{tid}"),
+                InlineKeyboardButton("📅 جدولة",       callback_data=f"task_sched_{tid}"),
+                InlineKeyboardButton("📋 كل المهام",   callback_data="task_list"),
             )
             clear_state(uid)
             bot.send_message(msg.chat.id,
-                f"`{'━'*28}`\n"
-                f"  ✅ *المهمة أُنشئت بنجاح!*\n"
-                f"`{'━'*28}`\n\n"
+                f"`╔══════════════════════════╗`\n"
+                f"`║  ✅  المهمة أُنشئت!       ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
                 f"{icon} *{state['name']}*\n"
-                f"{S.ID} `{tid}`\n"
-                f"🎯 `{state['target']}`\n"
-                f"🏷 {S.task_type_ar(state['task_type'])}\n\n"
-                f"اختر الخطوة التالية 👇",
+                f"🆔 `{tid}` | 🎯 `{state['target']}`\n"
+                f"🏷️ {S.task_type_ar(state['task_type'])}\n\n"
+                f"_اختر الخطوة التالية 👇_",
                 parse_mode="Markdown", reply_markup=kb
             )
         except Exception as e:
+            clear_state(uid)
             bot.send_message(msg.chat.id, S.error(str(e)), parse_mode="Markdown")
 
     # ══════════════════════════════════════════
@@ -2066,50 +2584,88 @@ def setup_bot():
     @bot.callback_query_handler(func=lambda c: c.data == "menu_schedules")
     def cb_menu_schedules(call: CallbackQuery):
         if not is_admin(call): return
-        jobs  = sched_jobs()
+        jobs = sched_jobs()
         text = (
-            f"{S.header('إدارة الجداول', S.SCHEDULE)}\n\n"
-            f"{S.field('جداول نشطة', len(jobs), S.CLOCK)}\n"
-            f"{S.field('المجدول', '🟢 يعمل' if _scheduler.running else '🔴 متوقف')}\n\n"
+            f"`╔══════════════════════════╗`\n"
+            f"`║  📅  إدارة الجداول       ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"⏰ جداول نشطة: `{len(jobs)}`\n"
+            f"🤖 المجدول: `{'🟢 يعمل' if _scheduler.running else '🔴 متوقف'}`\n"
         )
         if jobs:
-            text += "*أقرب مهمة:*\n"
+            text += "\n*أقرب 3 مهام:*\n"
             for j in jobs[:3]:
-                text += f"  🕐 {j['name']} → `{j['next'][:16]}`\n"
+                text += f"  ⏭️ {j['name'][:20]} → `{str(j['next'])[:16]}`\n"
+        text += "\n_اختر ما تريد 👇_"
         kb = InlineKeyboardMarkup(row_width=2)
         kb.add(
-            InlineKeyboardButton("📋 عرض الكل",       callback_data="sched_list"),
-            InlineKeyboardButton("➕ جدول جديد",      callback_data="sched_add_pick"),
-            InlineKeyboardButton("◀️ رجوع",           callback_data="back_main"),
+            InlineKeyboardButton("📋 عرض الكل",     callback_data="sched_list"),
+            InlineKeyboardButton("➕ جدول جديد",    callback_data="sched_add_pick"),
+            InlineKeyboardButton("🔄 إعادة تحميل",  callback_data="sched_reload"),
+            InlineKeyboardButton("◀️ رجوع",          callback_data="back_main"),
         )
         edit_or_send(call, text, kb)
         bot.answer_callback_query(call.id)
+
+    @bot.callback_query_handler(func=lambda c: c.data == "sched_reload")
+    def cb_sched_reload(call: CallbackQuery):
+        if not is_admin(call): return
+        bot.answer_callback_query(call.id, "🔄 جاري إعادة تحميل الجداول...")
+        try:
+            for job in _scheduler.get_jobs():
+                try: _scheduler.remove_job(job.id)
+                except Exception: pass
+            arun(sched_load_all())
+            jobs = sched_jobs()
+            edit_or_send(call,
+                f"✅ *تم إعادة تحميل الجداول!*\n\n"
+                f"⏰ جداول نشطة: `{len(jobs)}`",
+                kb_back("menu_schedules")
+            )
+        except Exception as e:
+            edit_or_send(call, S.error(str(e)), kb_back("menu_schedules"))
 
     @bot.callback_query_handler(func=lambda c: c.data == "sched_list")
     def cb_sched_list(call: CallbackQuery):
         if not is_admin(call): return
         jobs = sched_jobs()
-        if not jobs:
+        db_scheds = arun(db_get_active_schedules())
+        if not jobs and not db_scheds:
             edit_or_send(call,
-                f"{S.header('الجداول', S.SCHEDULE)}\n\n📭 _لا توجد جداول نشطة_",
+                f"`╔══════════════════════════╗`\n"
+                f"`║  📅  الجداول              ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"📭 _لا توجد جداول نشطة_\n\n"
+                f"اضغط ➕ لجدولة مهمة",
                 kb_back("menu_schedules")
             )
             bot.answer_callback_query(call.id)
             return
-        lines = [f"{S.header('الجداول النشطة', S.CLOCK)}\n"]
+        lines = [
+            f"`╔══════════════════════════╗`",
+            f"`║  📅  الجداول النشطة       ║`",
+            f"`╚══════════════════════════╝`\n",
+            f"⏰ في المجدول: `{len(jobs)}` | 🗄️ في DB: `{len(db_scheds)}`\n",
+        ]
         for j in jobs:
+            name_safe = j['name'].replace("_", r"\_").replace("*", r"\*")
             lines.append(
-                f"\n⏰ *{j['name']}*\n"
-                f"  {S.ID} `{j['id']}`\n"
-                f"  ⏭ التالي: `{str(j['next'])[:16]}`"
+                f"⏰ *{name_safe}*\n"
+                f"  🆔 `{j['id']}` | ⏭️ التالي: `{str(j['next'])[:16]}`"
             )
         kb = InlineKeyboardMarkup(row_width=1)
-        for j in jobs[:5]:
+        for j in jobs[:8]:
+            raw_id = j['id']
+            db_id  = raw_id[1:] if raw_id.startswith("s") else raw_id
+            nm = j['name'][:22]
             kb.add(InlineKeyboardButton(
-                f"🗑 حذف: {j['name'][:20]}",
-                callback_data=f"sched_delete_{j['id'][1:]}"
+                f"🗑️ حذف: {nm}",
+                callback_data=f"sched_delete_{db_id}"
             ))
-        kb.add(InlineKeyboardButton("◀️ رجوع", callback_data="menu_schedules"))
+        kb.row(
+            InlineKeyboardButton("🔄 تحديث", callback_data="sched_list"),
+            InlineKeyboardButton("◀️ رجوع",  callback_data="menu_schedules"),
+        )
         edit_or_send(call, "\n".join(lines), kb)
         bot.answer_callback_query(call.id)
 
@@ -2137,21 +2693,23 @@ def setup_bot():
     @bot.callback_query_handler(func=lambda c: c.data.startswith("task_sched_"))
     def cb_task_sched(call: CallbackQuery):
         uid = call.from_user.id
-        tid = int(call.data.split("_")[-1])
+        tid = int(call.data.split("_", 2)[2])
         set_state(uid, {"step":"sched_type","task_id":tid})
         kb = InlineKeyboardMarkup(row_width=1)
         kb.add(
-            InlineKeyboardButton("⏰ مرة واحدة (Once)",         callback_data="sc_t_once"),
-            InlineKeyboardButton("🔁 تكرار بفترة (Interval)",   callback_data="sc_t_interval"),
-            InlineKeyboardButton("📆 جدول Cron",                callback_data="sc_t_cron"),
-            InlineKeyboardButton("❌ إلغاء",                    callback_data="cancel"),
+            InlineKeyboardButton("⏰ مرة واحدة (Once)",       callback_data="sc_t_once"),
+            InlineKeyboardButton("🔁 تكرار بفترة (Interval)", callback_data="sc_t_interval"),
+            InlineKeyboardButton("📆 جدول Cron متقدم",        callback_data="sc_t_cron"),
+            InlineKeyboardButton("❌ إلغاء",                  callback_data="cancel"),
         )
         edit_or_send(call,
-            f"{S.header(f'جدولة المهمة {tid}', S.CLOCK)}\n\n"
+            f"`╔══════════════════════════╗`\n"
+            f"`║  📅  جدولة المهمة {tid}     ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
             f"اختر *نوع* الجدولة 👇\n\n"
-            f"• *Once* = تشغيل مرة واحدة في وقت محدد\n"
-            f"• *Interval* = تكرار كل فترة\n"
-            f"• *Cron* = جدول متقدم (مثل Linux cron)",
+            f"⏰ *Once* — تشغيل مرة واحدة في وقت محدد\n"
+            f"🔁 *Interval* — تكرار كل فترة زمنية\n"
+            f"📆 *Cron* — جدول متقدم (مثل Linux cron)",
             kb
         )
         bot.answer_callback_query(call.id)
@@ -2166,28 +2724,34 @@ def setup_bot():
         state["step"]       = "sched_data"
         prompts = {
             "once": (
-                f"{S.header('توقيت التشغيل', S.CLOCK)}\n\n"
+                f"`╔══════════════════════════╗`\n"
+                f"`║  ⏰  توقيت التشغيل        ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
                 f"📅 أرسل التاريخ والوقت:\n\n"
                 f"`YYYY-MM-DD HH:MM`\n\n"
                 f"مثال: `2025-12-25 09:00`"
             ),
             "interval": (
-                f"{S.header('فترة التكرار', S.REFRESH)}\n\n"
-                f"🔁 أرسل الفترة الزمنية:\n\n"
-                f"• `hours=2` كل ساعتين\n"
-                f"• `minutes=30` كل 30 دقيقة\n"
-                f"• `days=1` كل يوم\n"
-                f"• `hours=1 minutes=30` كل ساعة ونصف"
+                f"`╔══════════════════════════╗`\n"
+                f"`║  🔁  فترة التكرار         ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"أرسل الفترة الزمنية:\n\n"
+                f"• `hours=2` — كل ساعتين\n"
+                f"• `minutes=30` — كل 30 دقيقة\n"
+                f"• `days=1` — كل يوم\n"
+                f"• `hours=1 minutes=30` — كل ساعة ونصف"
             ),
             "cron": (
-                f"{S.header('Cron Expression', S.GEAR)}\n\n"
-                f"📆 أرسل تعبير Cron (5 حقول):\n\n"
+                f"`╔══════════════════════════╗`\n"
+                f"`║  📆  Cron Expression      ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"أرسل تعبير Cron (5 حقول):\n\n"
                 f"`دقيقة ساعة يوم شهر يوم_أسبوع`\n\n"
                 f"أمثلة:\n"
-                f"• `0 9 * * *` كل يوم 9 صباحًا\n"
-                f"• `0 * * * *` كل ساعة\n"
-                f"• `0 8 * * 1` كل اثنين 8ص\n"
-                f"• `*/30 * * * *` كل 30 دقيقة"
+                f"• `0 9 * * *` — كل يوم 9 صباحًا\n"
+                f"• `0 * * * *` — كل ساعة\n"
+                f"• `0 8 * * 1` — كل اثنين 8ص\n"
+                f"• `*/30 * * * *` — كل 30 دقيقة"
             ),
         }
         edit_or_send(call, prompts[stype])
@@ -2228,10 +2792,12 @@ def setup_bot():
         state["tdata"] = tdata
         state["step"]  = "sched_max"
         bot.send_message(msg.chat.id,
-            f"{S.header('عدد مرات التشغيل', S.CHART)}\n\n"
-            f"🔢 كم مرة تريد تشغيل هذه المهمة؟\n\n"
-            f"• أدخل رقمًا مثل `5`\n"
-            f"• أو `0` للتشغيل *اللانهائي* ∞",
+            f"`╔══════════════════════════╗`\n"
+            f"`║  🔢  عدد مرات التشغيل    ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"كم مرة تريد تشغيل هذه المهمة؟\n\n"
+            f"• رقم محدد مثل `5`\n"
+            f"• `0` للتشغيل *اللانهائي* ♾️",
             parse_mode="Markdown"
         )
 
@@ -2251,14 +2817,13 @@ def setup_bot():
         tdata = state["tdata"]
         try:
             sid = arun(sched_add(tid, stype, tdata, max_runs))
-            runs_txt = "♾️ لانهائي" if n == 0 else f"{n} مرة"
+            runs_txt = "♾️ لانهائي" if n == 0 else f"`{n}` مرة"
             bot.send_message(msg.chat.id,
-                f"`{'━'*28}`\n"
-                f"  📅 *تم إنشاء الجدول بنجاح!*\n"
-                f"`{'━'*28}`\n\n"
-                f"{S.ID} `{sid}`\n"
-                f"⚙️ المهمة: `{tid}`\n"
-                f"🏷 النوع: {S.trigger_type_ar(stype)}\n"
+                f"`╔══════════════════════════╗`\n"
+                f"`║  ✅  تم إنشاء الجدول!     ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"🆔 `{sid}` | ⚙️ المهمة: `{tid}`\n"
+                f"🏷️ النوع: {S.trigger_type_ar(stype)}\n"
                 f"🔢 المرات: {runs_txt}\n\n"
                 f"🚀 _الجدول يعمل الآن!_",
                 parse_mode="Markdown",
@@ -2270,9 +2835,8 @@ def setup_bot():
     @bot.callback_query_handler(func=lambda c: c.data.startswith("sched_delete_"))
     def cb_sched_delete(call: CallbackQuery):
         if not is_admin(call): return
-        sid_str = call.data.replace("sched_delete_","")
-        try: sid = int(sid_str)
-        except ValueError: sid = 0
+        try: sid = int(call.data.split("_", 2)[2])
+        except (ValueError, IndexError): sid = 0
         edit_or_send(call,
             f"⚠️ *حذف الجدول `{sid}`؟*",
             kb_confirm(f"sched_confirm_{sid}", "sched_list")
@@ -2281,7 +2845,12 @@ def setup_bot():
 
     @bot.callback_query_handler(func=lambda c: c.data.startswith("sched_confirm_"))
     def cb_sched_confirm(call: CallbackQuery):
-        sid = int(call.data.split("_")[-1])
+        if not is_admin(call): return
+        try:
+            sid = int(call.data.split("_", 2)[2])
+        except (ValueError, IndexError):
+            bot.answer_callback_query(call.id, "❌ بيانات خاطئة")
+            return
         arun(sched_remove(sid))
         edit_or_send(call, f"✅ *تم حذف الجدول `{sid}`*", kb_back("menu_schedules"))
         bot.answer_callback_query(call.id, "✅ تم")
@@ -2294,45 +2863,41 @@ def setup_bot():
     def cb_menu_stats(call: CallbackQuery):
         if not is_admin(call): return
         bot.answer_callback_query(call.id, "⏳ جاري التحميل...")
-        stats = arun(db_get_stats())
+        stats    = arun(db_get_stats())
         connected = mgr_count()
         total_acc = stats["total_accounts"]
-        success_rate = (
-            round(stats["ok_total"] / max(stats["total_logs"],1) * 100, 1)
-        ) if stats["total_logs"] > 0 else 0
+        total_logs = max(stats["total_logs"], 1)
+        success_rate = round(stats["ok_total"] / total_logs * 100, 1)
 
-        bar_today = S.progress_bar(stats["ok_today"], max(stats["ok_today"]+stats["fail_today"],1))
-        bar_total = S.progress_bar(stats["ok_total"], max(stats["total_logs"],1))
+        bar_today = S.progress_bar(stats["ok_today"], max(stats["ok_today"]+stats["fail_today"], 1))
+        bar_total = S.progress_bar(stats["ok_total"], total_logs)
 
         text = (
-            f"`{'━'*28}`\n"
-            f"  📊 *إحصائيات النظام*\n"
-            f"`{'━'*28}`\n\n"
-
-            f"👤 *الحسابات:*\n"
-            f"  الإجمالي:  `{total_acc}`\n"
-            f"  متصل:      `{connected}` 🟢\n"
-            f"  محظور:     `{stats['banned_accounts']}` 🚫\n\n"
-
-            f"⚙️ *المهام والجداول:*\n"
-            f"  المهام:    `{stats['total_tasks']}`\n"
-            f"  الجداول:   `{stats['total_schedules']}`\n\n"
-
-            f"📈 *الأداء اليوم:*\n"
-            f"  ✅ نجح: `{stats['ok_today']}`  ❌ فشل: `{stats['fail_today']}`\n"
-            f"  `{bar_today}`\n\n"
-
-            f"📊 *الأداء الكلي:*\n"
-            f"  ✅ نجح: `{stats['ok_total']}`  ❌ فشل: `{stats['fail_total']}`\n"
-            f"  `{bar_total}`\n"
-            f"  معدل النجاح: `{success_rate}%`\n\n"
-
-            f"💬 *إجمالي الرسائل المُرسلة:* `{S.format_number(stats['total_msgs'])}`"
+            f"`╔══════════════════════════╗`\n"
+            f"`║  📊  إحصائيات النظام     ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"┌─ *👤 الحسابات* ───────────\n"
+            f"│  إجمالي:  `{total_acc}` | متصل: `{connected}` 🟢\n"
+            f"│  محظور:   `{stats['banned_accounts']}` 🚫\n"
+            f"└──────────────────────────\n\n"
+            f"┌─ *⚙️ المهام والجداول* ─────\n"
+            f"│  مهام:    `{stats['total_tasks']}`\n"
+            f"│  جداول:   `{stats['total_schedules']}`\n"
+            f"└──────────────────────────\n\n"
+            f"┌─ *📈 أداء اليوم* ──────────\n"
+            f"│  ✅ `{stats['ok_today']}` نجح  |  ❌ `{stats['fail_today']}` فشل\n"
+            f"│  `{bar_today}`\n"
+            f"└──────────────────────────\n\n"
+            f"┌─ *📊 الأداء الكلي* ────────\n"
+            f"│  ✅ `{stats['ok_total']}` نجح  |  ❌ `{stats['fail_total']}` فشل\n"
+            f"│  `{bar_total}` `{success_rate}%`\n"
+            f"└──────────────────────────\n\n"
+            f"💬 رسائل كلية: `{S.format_number(stats['total_msgs'])}`"
         )
         kb = InlineKeyboardMarkup(row_width=2)
         kb.add(
-            InlineKeyboardButton("🔄 تحديث",  callback_data="menu_stats"),
-            InlineKeyboardButton("◀️ رجوع",   callback_data="back_main"),
+            InlineKeyboardButton("🔄 تحديث", callback_data="menu_stats"),
+            InlineKeyboardButton("◀️ رجوع",  callback_data="back_main"),
         )
         edit_or_send(call, text, kb)
 
@@ -2346,28 +2911,33 @@ def setup_bot():
         logs = arun(db_get_logs(15))
         if not logs:
             edit_or_send(call,
-                f"{S.header('السجلات', S.LOG)}\n\n📭 _لا توجد سجلات بعد_",
+                f"`╔══════════════════════════╗`\n"
+                f"`║  📋  السجلات              ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"📭 _لا توجد سجلات بعد_",
                 kb_back("back_main")
             )
             bot.answer_callback_query(call.id)
             return
-        lines = [f"{S.header('آخر العمليات', S.LOG)}\n"]
+        lines = [
+            f"`╔══════════════════════════╗`",
+            f"`║  📋  آخر العمليات         ║`",
+            f"`╚══════════════════════════╝`\n",
+        ]
         for l in logs:
-            icon  = "✅" if l["status"]=="success" else "❌"
-            tname = l.get("task_name","؟")
-            phone = l.get("phone","")
-            dur   = f" `{l.get('duration_ms',0)}ms`" if l.get("duration_ms") else ""
+            icon  = "✅" if l["status"] == "success" else "❌"
+            tname = l.get("task_name", "؟")
+            dur   = f"`{l.get('duration_ms',0)}ms`" if l.get("duration_ms") else ""
             lines.append(
-                f"{icon} `{str(l['executed_at'])[:16]}` "
-                f"*{tname}*{dur}\n"
-                f"  📱 {phone}"
+                f"{icon} *{tname}* {dur}\n"
+                f"  🕐 `{str(l['executed_at'])[:16]}` | 📱 {l.get('phone','—')}"
             )
         kb = InlineKeyboardMarkup(row_width=2)
         kb.add(
-            InlineKeyboardButton("✅ الناجحة فقط",  callback_data="logs_success"),
-            InlineKeyboardButton("❌ الفاشلة فقط",  callback_data="logs_failed"),
-            InlineKeyboardButton("🔄 تحديث",        callback_data="menu_logs"),
-            InlineKeyboardButton("◀️ رجوع",         callback_data="back_main"),
+            InlineKeyboardButton("✅ الناجحة", callback_data="logs_success"),
+            InlineKeyboardButton("❌ الفاشلة", callback_data="logs_failed"),
+            InlineKeyboardButton("🔄 تحديث",   callback_data="menu_logs"),
+            InlineKeyboardButton("◀️ رجوع",    callback_data="back_main"),
         )
         edit_or_send(call, "\n".join(lines), kb)
         bot.answer_callback_query(call.id)
@@ -2376,16 +2946,27 @@ def setup_bot():
     def cb_logs_filter(call: CallbackQuery):
         status = "success" if call.data == "logs_success" else "failed"
         logs   = arun(db_get_logs(15, status=status))
-        icon   = "✅" if status=="success" else "❌"
+        icon   = "✅" if status == "success" else "❌"
+        label  = "الناجحة" if status == "success" else "الفاشلة"
         if not logs:
-            edit_or_send(call, f"📭 _لا توجد عمليات {icon}_", kb_back("menu_logs"))
+            edit_or_send(call,
+                f"`╔══════════════════════════╗`\n"
+                f"`║  📋  السجلات {label}      ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"📭 _لا توجد عمليات {icon}_",
+                kb_back("menu_logs")
+            )
             bot.answer_callback_query(call.id)
             return
-        lines = [f"{S.header(f'السجلات {icon}', S.LOG)}\n"]
+        lines = [
+            f"`╔══════════════════════════╗`",
+            f"`║  📋  السجلات {label}      ║`",
+            f"`╚══════════════════════════╝`\n",
+        ]
         for l in logs:
             lines.append(
-                f"{icon} `{str(l['executed_at'])[:16]}` *{l.get('task_name','؟')}*\n"
-                f"  {l.get('message','') or '—'}"
+                f"{icon} *{l.get('task_name','؟')}*\n"
+                f"  🕐 `{str(l['executed_at'])[:16]}` — _{l.get('message','') or '—'}_"
             )
         edit_or_send(call, "\n".join(lines), kb_back("menu_logs"))
         bot.answer_callback_query(call.id)
@@ -2399,23 +2980,28 @@ def setup_bot():
         if not is_admin(call): return
         bl = arun(db_get_blacklist())
         text = (
-            f"{S.header('إعدادات الحماية', S.SHIELD)}\n\n"
-            f"🚫 *القائمة السوداء:* `{len(bl)}` هدف\n\n"
-            f"*إعدادات Anti-Ban:*\n"
-            f"  تأخير الإرسال: `{MIN_DELAY}-{MAX_DELAY}s`\n"
-            f"  تأخير الانضمام: `{JOIN_DELAY}s`\n"
-            f"  حد الإرسال: `{RATE_MSGS}` رسالة / `{RATE_PERIOD}s`\n\n"
+            f"`╔══════════════════════════╗`\n"
+            f"`║  🛡️  إعدادات الحماية     ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"┌─ *القائمة السوداء* ─────────\n"
+            f"│  🚫 عدد الأهداف: `{len(bl)}`\n"
+            f"└──────────────────────────\n\n"
+            f"┌─ *Anti-Ban Settings* ───────\n"
+            f"│  ⏱️ تأخير الإرسال: `{MIN_DELAY}-{MAX_DELAY}s`\n"
+            f"│  ⏱️ تأخير الانضمام: `{JOIN_DELAY}s`\n"
+            f"│  📊 حد الإرسال: `{RATE_MSGS}` رسالة/`{RATE_PERIOD}s`\n"
+            f"└──────────────────────────"
         )
         if bl:
-            text += "*القائمة السوداء:*\n"
+            text += "\n\n*آخر إضافات القائمة السوداء:*\n"
             for b in bl[:5]:
-                text += f"  🚫 `{b['target']}` — {b.get('reason','—')}\n"
+                text += f"  🚫 `{b['target']}` — _{b.get('reason','—')}_\n"
         kb = InlineKeyboardMarkup(row_width=2)
         kb.add(
-            InlineKeyboardButton("🚫 إضافة للقائمة السوداء", callback_data="bl_add"),
-            InlineKeyboardButton("✅ إزالة من القائمة",       callback_data="bl_remove"),
-            InlineKeyboardButton("📋 عرض القائمة",           callback_data="bl_list"),
-            InlineKeyboardButton("◀️ رجوع",                   callback_data="back_main"),
+            InlineKeyboardButton("🚫 إضافة للقائمة",  callback_data="bl_add"),
+            InlineKeyboardButton("✅ إزالة من القائمة", callback_data="bl_remove"),
+            InlineKeyboardButton("📋 عرض القائمة",     callback_data="bl_list"),
+            InlineKeyboardButton("◀️ رجوع",             callback_data="back_main"),
         )
         edit_or_send(call, text, kb)
         bot.answer_callback_query(call.id)
@@ -2426,8 +3012,10 @@ def setup_bot():
         uid = call.from_user.id
         set_state(uid, {"step":"bl_add_target"})
         edit_or_send(call,
-            f"{S.header('إضافة للقائمة السوداء', S.BANNED)}\n\n"
-            f"أرسل اسم المستخدم أو الـ ID:\n`@username` أو `-1001234`"
+            f"`╔══════════════════════════╗`\n"
+            f"`║  🚫  إضافة للقائمة السوداء║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"أرسل اليوزر أو الـ ID:\n`@username` أو `-1001234`"
         )
         bot.answer_callback_query(call.id)
 
@@ -2448,10 +3036,20 @@ def setup_bot():
         if not is_admin(call): return
         bl = arun(db_get_blacklist())
         if not bl:
-            edit_or_send(call, "📭 _القائمة السوداء فارغة_", kb_back("menu_protection"))
+            edit_or_send(call,
+                f"`╔══════════════════════════╗`\n"
+                f"`║  🚫  القائمة السوداء      ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"📭 _القائمة السوداء فارغة_",
+                kb_back("menu_protection")
+            )
             bot.answer_callback_query(call.id)
             return
-        lines = [f"{S.header('القائمة السوداء', S.BANNED)}\n"]
+        lines = [
+            f"`╔══════════════════════════╗`",
+            f"`║  🚫  القائمة السوداء      ║`",
+            f"`╚══════════════════════════╝`\n",
+        ]
         for b in bl:
             lines.append(f"🚫 `{b['target']}` — _{b.get('reason','—')}_")
         edit_or_send(call, "\n".join(lines), kb_back("menu_protection"))
@@ -2462,14 +3060,16 @@ def setup_bot():
         if not is_admin(call): return
         set_state(call.from_user.id, {"step": "bl_remove_target"})
         edit_or_send(call,
-            f"{S.header('إزالة من القائمة السوداء', S.SHIELD)}\n\n"
+            f"`╔══════════════════════════╗`\n"
+            f"`║  ✅  إزالة من القائمة     ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
             f"أرسل الهدف المراد إزالته:\n`@username` أو `-1001234`"
         )
         bot.answer_callback_query(call.id)
 
     @bot.message_handler(func=lambda m: in_state(m.from_user.id, "bl_remove_target"))
     def bl_step_remove(msg: Message):
-        uid = msg.from_user.id
+        uid    = msg.from_user.id
         target = msg.text.strip()
         clear_state(uid)
         arun(db_remove_blacklist(target))
@@ -2482,30 +3082,45 @@ def setup_bot():
     def cb_acc_tasks(call: CallbackQuery):
         if not is_admin(call): return
         bot.answer_callback_query(call.id, "⏳ جاري التحميل...")
-        aid = int(call.data.split("_")[-1])
+        aid   = int(call.data.split("_", 2)[2])
         tasks = arun(db_get_all_tasks(account_id=aid))
         if not tasks:
-            edit_or_send(call, f"📭 _لا توجد مهام للحساب {aid}_", kb_back(f"acc_detail_{aid}"))
+            edit_or_send(call,
+                f"`╔══════════════════════════╗`\n"
+                f"`║  ⚙️  مهام الحساب          ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"📭 _لا توجد مهام للحساب `#{aid}`_",
+                kb_back(f"acc_detail_{aid}")
+            )
             return
-        lines = [f"{S.header(f'مهام الحساب {aid}', S.TASK)}\n"]
+        lines = [
+            f"`╔══════════════════════════╗`",
+            f"`║  ⚙️  مهام الحساب #{aid}     ║`",
+            f"`╚══════════════════════════╝`\n",
+        ]
         kb = InlineKeyboardMarkup(row_width=1)
         for t in tasks[:8]:
             icon = S.task_type_icon(t["task_type"])
-            lines.append(f"\n{icon} `{t['id']}` *{t['name']}* → `{t['target']}`")
+            lines.append(f"{icon} `#{t['id']}` *{t['name']}* → `{t['target'][:20]}`")
             kb.add(InlineKeyboardButton(
                 f"{icon} {t['name'][:25]} (#{t['id']})",
                 callback_data=f"task_detail_{t['id']}"
             ))
         kb.add(InlineKeyboardButton("◀️ رجوع", callback_data=f"acc_detail_{aid}"))
         edit_or_send(call, "\n".join(lines), kb)
+        bot.answer_callback_query(call.id)
 
     @bot.callback_query_handler(func=lambda c: c.data.startswith("task_edit_"))
     def cb_task_edit(call: CallbackQuery):
         if not is_admin(call): return
-        tid = int(call.data.split("_")[-1])
+        tid = int(call.data.split("_", 2)[2])
         bot.answer_callback_query(call.id, "⚠️ قيد التطوير")
         edit_or_send(call,
-            f"⚠️ *ميزة التعديل قيد التطوير*\n\nاحذف المهمة `{tid}` وأنشئ واحدة جديدة.",
+            f"`╔══════════════════════════╗`\n"
+            f"`║  ✏️  تعديل المهمة          ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"⚠️ _ميزة التعديل المباشر قادمة قريباً_\n\n"
+            f"حالياً: احذف المهمة `#{tid}` وأنشئ واحدة جديدة.",
             kb_back(f"task_detail_{tid}")
         )
 
@@ -2519,23 +3134,30 @@ def setup_bot():
         notifs = arun(db_get_unread_notifications())
         if not notifs:
             edit_or_send(call,
-                f"{S.header('الإشعارات', S.BELL)}\n\n✅ _لا توجد إشعارات جديدة_",
+                f"`╔══════════════════════════╗`\n"
+                f"`║  🔔  الإشعارات            ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"✅ _لا توجد إشعارات جديدة_",
                 kb_back("back_main")
             )
             bot.answer_callback_query(call.id)
             return
-        lines = [f"{S.header(f'إشعارات جديدة ({len(notifs)})', S.BELL)}\n"]
-        icons = {"reconnect":"🔄","ban":"🚫","new_account":"🆕","error":"❌"}
+        lines = [
+            f"`╔══════════════════════════╗`",
+            f"`║  🔔  إشعارات ({len(notifs)})         ║`",
+            f"`╚══════════════════════════╝`\n",
+        ]
+        icons = {"reconnect": "🔄", "ban": "🚫", "new_account": "🆕", "error": "❌"}
         for n in notifs:
-            icon = icons.get(n["type"],"🔔")
+            icon = icons.get(n["type"], "🔔")
             lines.append(
                 f"{icon} *{n['title']}*\n"
                 f"  _{n.get('body','')}_\n"
-                f"  🕐 {S.format_time(n['created_at'])}"
+                f"  {S.format_time(n['created_at'])}"
             )
         arun(db_mark_notifications_read())
         kb = InlineKeyboardMarkup()
-        kb.add(InlineKeyboardButton("◀️ رجوع", callback_data="back_main"))
+        kb.add(InlineKeyboardButton("◀️ رجوع للرئيسية", callback_data="back_main"))
         edit_or_send(call, "\n".join(lines), kb)
         bot.answer_callback_query(call.id)
 
@@ -2548,26 +3170,35 @@ def setup_bot():
         if not is_admin(msg): return
         connected = mgr_count()
         jobs      = len(sched_jobs())
-        bot.reply_to(msg,
-            f"`{'━'*26}`\n"
-            f"  🏓 *Pong!*\n"
-            f"`{'━'*26}`\n\n"
-            f"🟢 متصل: `{connected}`\n"
-            f"📅 جداول: `{jobs}`\n"
-            f"🤖 المجدول: {'🟢 يعمل' if _scheduler.running else '🔴 متوقف'}",
-            parse_mode="Markdown"
-        )
+        accs      = mgr_get_all_for_task()
+        now_str   = datetime.now(TZ).strftime("%H:%M:%S  %d/%m/%Y")
+        lines = [
+            f"`╔══════════════════════════╗`",
+            f"`║  🏓  Pong!  — متصل ✅     ║`",
+            f"`╚══════════════════════════╝`\n",
+            f"🟢 حسابات متصلة: `{connected}`",
+            f"📅 جداول نشطة:  `{jobs}`",
+            f"🤖 المجدول: `{'🟢 يعمل' if _scheduler.running else '🔴 متوقف'}`",
+            f"🕐 `{now_str}`",
+        ]
+        if accs:
+            lines.append(f"\n*الحسابات:*")
+            for a in accs[:5]:
+                lines.append(f"  🟢 {a['full_name']} `(#{a['id']})`")
+        bot.reply_to(msg, "\n".join(lines), parse_mode="Markdown")
 
     @bot.message_handler(commands=["stats"])
     def cmd_stats(msg: Message):
         if not is_admin(msg): return
         stats = arun(db_get_stats())
         bot.send_message(msg.chat.id,
-            f"{S.header('الإحصائيات', S.CHART)}\n\n"
+            f"`╔══════════════════════════╗`\n"
+            f"`║  📊  الإحصائيات           ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
             f"👤 حسابات: `{stats['active_accounts']}/{stats['total_accounts']}`\n"
-            f"🟢 متصل: `{mgr_count()}`\n"
-            f"⚙️ مهام: `{stats['total_tasks']}`\n"
-            f"📅 جداول: `{stats['total_schedules']}`\n\n"
+            f"🟢 متصل:   `{mgr_count()}`\n"
+            f"⚙️ مهام:   `{stats['total_tasks']}`\n"
+            f"📅 جداول:  `{stats['total_schedules']}`\n\n"
             f"اليوم: ✅`{stats['ok_today']}` ❌`{stats['fail_today']}`\n"
             f"الكل:  ✅`{stats['ok_total']}` ❌`{stats['fail_total']}`",
             parse_mode="Markdown"
@@ -2579,18 +3210,25 @@ def setup_bot():
         parts = msg.text.split(maxsplit=3)
         if len(parts) < 4:
             return bot.reply_to(msg,
-                "الاستخدام:\n`/send <acc_id> <target> <رسالة>`\n\n"
-                "مثال:\n`/send 1 @group مرحبا!`",
+                f"*الاستخدام:*\n`/send <acc\\_id> <target> <رسالة>`\n\n"
+                f"*مثال:*\n`/send 1 @mygroup مرحبا كيفك!`",
                 parse_mode="Markdown"
             )
         try: aid = int(parts[1])
-        except ValueError: return bot.reply_to(msg, "❌ acc\\_id غير صحيح", parse_mode="Markdown")
+        except ValueError: return bot.reply_to(msg, "❌ acc\\_id يجب أن يكون رقمًا", parse_mode="Markdown")
+        target  = parts[2]
+        content = parts[3]   # ← الإصلاح: كانت parts[3] صحيحة لكن التعليق غلط
         actions = mgr_actions(aid)
         if not actions: return bot.reply_to(msg, f"❌ الحساب `{aid}` غير متصل", parse_mode="Markdown")
-        m = bot.reply_to(msg, S.loading(f"إرسال إلى {parts[2]}"), parse_mode="Markdown")
-        ok = arun(actions.send_message(parts[2], parts[3]))
+        m = bot.reply_to(msg, S.loading(f"إرسال إلى {target}"), parse_mode="Markdown")
+        ok = arun(actions.send_message(target, content))
         bot.edit_message_text(
-            f"✅ *تم الإرسال إلى* `{parts[2]}`" if ok else f"❌ *فشل الإرسال إلى* `{parts[2]}`",
+            f"✅ *تم الإرسال بنجاح!*\n\n"
+            f"🎯 `{target}`\n"
+            f"📱 الحساب: `{aid}`\n"
+            f"💬 _{content[:60]}{'...' if len(content)>60 else ''}_"
+            if ok else
+            f"❌ *فشل الإرسال!*\n\n🎯 `{target}`\n_تحقق من الهدف_",
             m.chat.id, m.message_id, parse_mode="Markdown"
         )
 
@@ -2600,14 +3238,21 @@ def setup_bot():
         parts = msg.text.split(maxsplit=2)
         if len(parts) < 3:
             return bot.reply_to(msg,
-                "الاستخدام:\n`/broadcast <target> <رسالة>`\n\n_يُرسل من جميع الحسابات_",
+                f"*الاستخدام:*\n`/broadcast <target> <رسالة>`\n\n"
+                f"_يُرسل من جميع الحسابات المتصلة_\n\n"
+                f"*مثال:*\n`/broadcast @mygroup أهلاً بالجميع!`",
                 parse_mode="Markdown"
             )
         target, text = parts[1], parts[2]
         ids = mgr_all_connected()
-        if not ids: return bot.reply_to(msg, "❌ لا توجد حسابات متصلة")
+        if not ids: return bot.reply_to(msg, "❌ *لا توجد حسابات متصلة*", parse_mode="Markdown")
         m = bot.send_message(msg.chat.id,
-            f"📡 *بث جماعي*\n🎯 `{target}`\n👤 {len(ids)} حساب\n\n{S.loading('جاري الإرسال')}",
+            f"`╔══════════════════════════╗`\n"
+            f"`║  📡  بث جماعي            ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"🎯 `{target}`\n"
+            f"👤 {len(ids)} حساب\n\n"
+            f"⏳ _جاري الإرسال..._",
             parse_mode="Markdown"
         )
         ok = fail = 0
@@ -2617,12 +3262,16 @@ def setup_bot():
                 r = arun(actions.send_message(target, text))
                 if r: ok += 1
                 else: fail += 1
-        bar = S.progress_bar(ok, ok+fail)
+        total = ok + fail
+        bar = S.progress_bar(ok, total)
+        pct = round(ok / total * 100) if total > 0 else 0
         bot.edit_message_text(
-            f"📡 *نتيجة البث*\n\n"
-            f"🎯 `{target}`\n"
+            f"`╔══════════════════════════╗`\n"
+            f"`║  📡  نتيجة البث           ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"🎯 `{target}`\n\n"
             f"✅ نجح: `{ok}` | ❌ فشل: `{fail}`\n"
-            f"`{bar}`",
+            f"`{bar}` `{pct}%`",
             m.chat.id, m.message_id, parse_mode="Markdown"
         )
 
@@ -2631,15 +3280,52 @@ def setup_bot():
         if not is_admin(msg): return
         parts = msg.text.split()
         if len(parts) < 3:
-            return bot.reply_to(msg, "الاستخدام: `/join <acc_id> <target>`", parse_mode="Markdown")
+            return bot.reply_to(msg,
+                f"*الاستخدام:*\n`/join <acc\\_id> <target>`\n\n"
+                f"*أمثلة:*\n"
+                f"`/join 1 @groupname`\n"
+                f"`/join 1 t.me/+xxxxx`\n"
+                f"`/join 1 -1001234567890`",
+                parse_mode="Markdown"
+            )
         try: aid = int(parts[1])
-        except ValueError: return bot.reply_to(msg, "❌ acc\\_id غير صحيح", parse_mode="Markdown")
+        except ValueError: return bot.reply_to(msg, "❌ acc\\_id يجب أن يكون رقمًا", parse_mode="Markdown")
         actions = mgr_actions(aid)
-        if not actions: return bot.reply_to(msg, "❌ الحساب غير متصل")
-        m = bot.reply_to(msg, S.loading(f"انضمام إلى {parts[2]}"), parse_mode="Markdown")
-        ok = arun(actions.join_group(parts[2]))
+        if not actions: return bot.reply_to(msg, f"❌ الحساب `{aid}` غير متصل", parse_mode="Markdown")
+        target = parts[2]
+        m = bot.reply_to(msg, S.loading(f"انضمام إلى {target}"), parse_mode="Markdown")
+        ok = arun(actions.join_group(target))
         bot.edit_message_text(
-            f"✅ *انضم إلى* `{parts[2]}`" if ok else f"❌ *فشل الانضمام إلى* `{parts[2]}`",
+            f"✅ *انضم بنجاح!*\n\n🔗 `{target}`\n📱 الحساب: `{aid}`"
+            if ok else
+            f"❌ *فشل الانضمام!*\n\n🔗 `{target}`\n_تحقق من الرابط أو الـ username_",
+            m.chat.id, m.message_id, parse_mode="Markdown"
+        )
+
+    @bot.message_handler(commands=["leave"])
+    def cmd_leave(msg: Message):
+        if not is_admin(msg): return
+        parts = msg.text.split()
+        if len(parts) < 3:
+            return bot.reply_to(msg,
+                f"*الاستخدام:*\n`/leave <acc\\_id> <target>`\n\n"
+                f"*أمثلة:*\n"
+                f"`/leave 1 @groupname`\n"
+                f"`/leave 1 -1001234567890`\n"
+                f"`/leave 1 t.me/+xxxxx`",
+                parse_mode="Markdown"
+            )
+        try: aid = int(parts[1])
+        except ValueError: return bot.reply_to(msg, "❌ acc\\_id يجب أن يكون رقمًا", parse_mode="Markdown")
+        actions = mgr_actions(aid)
+        if not actions: return bot.reply_to(msg, f"❌ الحساب `{aid}` غير متصل", parse_mode="Markdown")
+        target = parts[2]
+        m = bot.reply_to(msg, S.loading(f"مغادرة {target}"), parse_mode="Markdown")
+        ok = arun(actions.leave_group(target))
+        bot.edit_message_text(
+            f"✅ *غادر بنجاح!*\n\n🚪 `{target}`\n📱 الحساب: `{aid}`"
+            if ok else
+            f"❌ *فشلت المغادرة!*\n\n🚪 `{target}`\n_تأكد أن الحساب موجود في الجروب_",
             m.chat.id, m.message_id, parse_mode="Markdown"
         )
 
@@ -2648,44 +3334,52 @@ def setup_bot():
         if not is_admin(msg): return
         parts = msg.text.split()
         if len(parts) < 2:
-            return bot.reply_to(msg, "الاستخدام: `/dialogs <acc_id>`", parse_mode="Markdown")
+            return bot.reply_to(msg, "الاستخدام: `/dialogs <acc\\_id>`", parse_mode="Markdown")
         try: aid = int(parts[1])
-        except ValueError: return bot.reply_to(msg, "❌ acc\\_id غير صحيح", parse_mode="Markdown")
+        except ValueError: return bot.reply_to(msg, "❌ acc\\_id يجب أن يكون رقمًا", parse_mode="Markdown")
         actions = mgr_actions(aid)
         if not actions: return bot.reply_to(msg, "❌ الحساب غير متصل")
         m = bot.reply_to(msg, S.loading("تحميل المحادثات"), parse_mode="Markdown")
         dialogs = arun(actions.get_dialogs(20))
         if not dialogs:
-            bot.edit_message_text("📭 لا توجد محادثات", m.chat.id, m.message_id)
+            bot.edit_message_text("📭 _لا توجد محادثات_", m.chat.id, m.message_id, parse_mode="Markdown")
             return
-        lines = [f"{S.header(f'محادثات الحساب {aid}', S.GROUP)}\n"]
+        lines = [
+            f"`╔══════════════════════════╗`",
+            f"`║  💬  محادثات #{aid}         ║`",
+            f"`╚══════════════════════════╝`\n",
+        ]
         for d in dialogs:
             name  = getattr(d.entity,"title",None) or getattr(d.entity,"first_name","؟")
-            uname = f"@{d.entity.username}" if getattr(d.entity,"username",None) else ""
-            lines.append(f"• `{d.entity.id}` *{name}* {uname}")
+            uname = f"  @{d.entity.username}" if getattr(d.entity,"username",None) else ""
+            lines.append(f"• `{d.entity.id}` *{name}*{uname}")
         bot.edit_message_text("\n".join(lines), m.chat.id, m.message_id, parse_mode="Markdown")
 
     @bot.message_handler(commands=["runtask"])
     def cmd_runtask(msg: Message):
         if not is_admin(msg): return
         parts = msg.text.split()
-        if len(parts) < 2: return bot.reply_to(msg, "الاستخدام: `/runtask <id>`", parse_mode="Markdown")
+        if len(parts) < 2:
+            return bot.reply_to(msg, "الاستخدام: `/runtask <id>`", parse_mode="Markdown")
         try: tid = int(parts[1])
         except ValueError: return bot.reply_to(msg, "❌ ID غير صحيح")
         task = arun(db_get_task(tid))
-        if not task: return bot.reply_to(msg, "❌ المهمة غير موجودة")
+        if not task: return bot.reply_to(msg, f"❌ المهمة `{tid}` غير موجودة", parse_mode="Markdown")
         actions = mgr_actions(task["account_id"])
         if not actions: return bot.reply_to(msg, "❌ الحساب غير متصل")
         m = bot.reply_to(msg, S.loading(f"تنفيذ المهمة {tid}"), parse_mode="Markdown")
         async def _r():
             t = task["task_type"]
-            if t=="send_message": return await actions.send_message(task["target"],task["content"] or "",task["parse_mode"])
-            elif t=="join_group":  return await actions.join_group(task["target"])
-            elif t=="leave_group": return await actions.leave_group(task["target"])
+            if t == "send_message": return await actions.send_message(task["target"], task["content"] or "", task["parse_mode"])
+            elif t == "join_group":  return await actions.join_group(task["target"])
+            elif t == "leave_group": return await actions.leave_group(task["target"])
             return False
         ok = arun(_r())
+        icon = S.task_type_icon(task["task_type"])
         bot.edit_message_text(
-            f"✅ *المهمة `{tid}` نُفّذت!*" if ok else f"❌ *فشلت المهمة `{tid}`*",
+            f"✅ *المهمة `#{tid}` نُفّذت!*\n{icon} `{task['target']}`"
+            if ok else
+            f"❌ *فشلت المهمة `#{tid}`*\n{icon} `{task['target']}`",
             m.chat.id, m.message_id, parse_mode="Markdown"
         )
 
@@ -2693,31 +3387,39 @@ def setup_bot():
     def cmd_delacc(msg: Message):
         if not is_admin(msg): return
         parts = msg.text.split()
-        if len(parts) < 2: return bot.reply_to(msg, "الاستخدام: `/delaccount <id>`", parse_mode="Markdown")
+        if len(parts) < 2:
+            return bot.reply_to(msg, "الاستخدام: `/delaccount <id>`", parse_mode="Markdown")
         try: aid = int(parts[1])
         except ValueError: return bot.reply_to(msg, "❌ ID غير صحيح")
         arun(mgr_remove(aid))
-        bot.reply_to(msg, f"✅ *تم حذف الحساب* `{aid}`", parse_mode="Markdown")
+        bot.reply_to(msg,
+            f"✅ *تم حذف الحساب `#{aid}` بنجاح*",
+            parse_mode="Markdown"
+        )
 
     @bot.message_handler(commands=["deltask"])
     def cmd_deltask(msg: Message):
         if not is_admin(msg): return
         parts = msg.text.split()
-        if len(parts) < 2: return bot.reply_to(msg, "الاستخدام: `/deltask <id>`", parse_mode="Markdown")
+        if len(parts) < 2:
+            return bot.reply_to(msg, "الاستخدام: `/deltask <id>`", parse_mode="Markdown")
         try: tid = int(parts[1])
         except ValueError: return bot.reply_to(msg, "❌ ID غير صحيح")
         arun(db_delete_task(tid))
-        bot.reply_to(msg, f"✅ *تم حذف المهمة* `{tid}`", parse_mode="Markdown")
+        bot.reply_to(msg,
+            f"✅ *تم حذف المهمة `#{tid}` بنجاح*",
+            parse_mode="Markdown"
+        )
 
     @bot.message_handler(commands=["update"])
     def cmd_update(msg: Message):
         if not is_admin(msg): return
         bot.send_message(msg.chat.id,
-            f"`{'━'*28}`\n"
-            f"  🔄 *تحديث ملف البوت*\n"
-            f"`{'━'*28}`\n\n"
+            f"`╔══════════════════════════╗`\n"
+            f"`║  🔄  تحديث البوت          ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
             f"📤 أرسل ملف `.py` الجديد الآن\n\n"
-            f"_سيتم استبدال الملف الحالي وإعادة التشغيل_",
+            f"_سيتم استبدال الملف الحالي وإعادة التشغيل تلقائياً_",
             parse_mode="Markdown"
         )
         set_state(msg.from_user.id, {"step": "awaiting_update_file"})
@@ -2753,7 +3455,9 @@ def setup_bot():
             current_file.write_bytes(file_data)
             clear_state(uid)
             bot.edit_message_text(
-                f"✅ *تم التحديث بنجاح!*\n\n"
+                f"`╔══════════════════════════╗`\n"
+                f"`║  ✅  تم التحديث!          ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
                 f"📁 `{doc.file_name}` — `{len(file_data):,}` byte\n"
                 f"💾 نسخة احتياطية: `{backup_file.name}`\n\n"
                 f"🔄 *جاري إعادة التشغيل...*",
@@ -2779,28 +3483,35 @@ def setup_bot():
     def cmd_help(msg: Message):
         if not is_admin(msg): return
         bot.send_message(msg.chat.id,
-            f"`{'━'*28}`\n"
-            f"  {S.BOT} *دليل الأوامر*\n"
-            f"`{'━'*28}`\n\n"
+            f"`╔══════════════════════════╗`\n"
+            f"`║  📋  دليل الأوامر         ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
             f"*👤 الحسابات:*\n"
-            f"/addaccount — إضافة حساب جديد\n"
-            f"/delaccount `<id>` — حذف حساب\n\n"
+            f"  `/addaccount` — إضافة حساب بالهاتف\n"
+            f"  `/addsession <key>` — إضافة بـ Session String مباشرة 🔑\n"
+            f"  `/delaccount <id>` — حذف حساب\n\n"
             f"*⚙️ المهام:*\n"
-            f"/addtask — إنشاء مهمة جديدة\n"
-            f"/runtask `<id>` — تشغيل فوري\n"
-            f"/deltask `<id>` — حذف مهمة\n\n"
-            f"*📡 إرسال سريع:*\n"
-            f"/send `<acc>` `<target>` `<msg>`\n"
-            f"/broadcast `<target>` `<msg>`\n"
-            f"/join `<acc>` `<target>`\n"
-            f"/dialogs `<acc>` — محادثات\n\n"
-            f"*📊 نظام:*\n"
-            f"/stats — إحصائيات\n"
-            f"/ping — اختبار\n"
-            f"/menu — القائمة الرئيسية\n\n"
+            f"  `/addtask` — إنشاء مهمة جديدة\n"
+            f"  `/runtask <id>` — تشغيل فوري\n"
+            f"  `/deltask <id>` — حذف مهمة\n\n"
+            f"*📤 إرسال سريع:*\n"
+            f"  `/send <acc> <target> <msg>` — إرسال رسالة\n"
+            f"  `/broadcast <target> <msg>` — بث جماعي\n\n"
+            f"*👥 الجروبات:*\n"
+            f"  `/join <acc> <target>` — انضمام\n"
+            f"  `/leave <acc> <target>` — مغادرة\n"
+            f"  `/dialogs <acc>` — عرض المحادثات\n\n"
+            f"*🤝 التواصل:*\n"
+            f"  زر *كلّم صاحب* من القائمة الرئيسية\n"
+            f"  أو استخدم `/send <acc> @username <msg>`\n\n"
+            f"*📊 النظام:*\n"
+            f"  `/stats` — إحصائيات\n"
+            f"  `/ping` — اختبار الاتصال\n"
+            f"  `/menu` — القائمة الرئيسية\n"
+            f"  `/restart` — إعادة تشغيل البوت 🔁\n\n"
             f"*🔑 Session Strings:*\n"
-            f"/showsessions — عرض جلسات البيئة\n"
-            f"/reloadsessions — إعادة تحميل الجلسات",
+            f"  `/showsessions` — عرض الجلسات\n"
+            f"  `/reloadsessions` — إعادة تحميل",
             parse_mode="Markdown",
             reply_markup=kb_main_menu()
         )
@@ -2809,45 +3520,553 @@ def setup_bot():
     def cmd_setcommands(msg: Message):
         if not is_admin(msg): return
         bot.set_my_commands([
-            BotCommand("start",       "🏠 القائمة الرئيسية"),
-            BotCommand("menu",        "🎛 لوحة التحكم"),
-            BotCommand("stats",       "📊 الإحصائيات"),
-            BotCommand("ping",        "🏓 اختبار الاتصال"),
-            BotCommand("addaccount",  "👤 إضافة حساب"),
-            BotCommand("addtask",     "⚙️ إضافة مهمة"),
-            BotCommand("runtask",     "▶️ تشغيل مهمة"),
-            BotCommand("send",        "📤 إرسال رسالة"),
-            BotCommand("broadcast",   "📡 بث جماعي"),
-            BotCommand("join",        "👥 انضمام لجروب"),
+            BotCommand("start",          "🏠 القائمة الرئيسية"),
+            BotCommand("menu",           "🎛️ لوحة التحكم"),
+            BotCommand("stats",          "📊 الإحصائيات"),
+            BotCommand("ping",           "🏓 اختبار الاتصال"),
+            BotCommand("addaccount",     "👤 إضافة حساب بهاتف"),
+            BotCommand("addsession",     "🔑 إضافة حساب بـ Session String"),
+            BotCommand("addtask",        "⚙️ إضافة مهمة"),
+            BotCommand("runtask",        "▶️ تشغيل مهمة"),
+            BotCommand("send",           "📤 إرسال رسالة"),
+            BotCommand("broadcast",      "📡 بث جماعي"),
+            BotCommand("join",           "🔗 انضمام لجروب"),
+            BotCommand("leave",          "🚪 مغادرة جروب"),
             BotCommand("dialogs",        "💬 عرض المحادثات"),
             BotCommand("showsessions",   "🔑 عرض Session Strings"),
             BotCommand("reloadsessions", "🔄 إعادة تحميل الجلسات"),
+            BotCommand("restart",        "🔁 إعادة تشغيل البوت"),
             BotCommand("help",           "❓ المساعدة"),
         ])
         bot.reply_to(msg, "✅ *تم تعيين الأوامر بنجاح!*", parse_mode="Markdown")
 
-    # ── Fallback ──
+    # ══════════════════════════════════════════
+    #  👥 قائمة الجروبات والأصدقاء
+    # ══════════════════════════════════════════
+
+    def kb_friends_groups_menu() -> InlineKeyboardMarkup:
+        kb = InlineKeyboardMarkup(row_width=2)
+        kb.add(
+            InlineKeyboardButton("🤝 أصدقائي",        callback_data="fg_friends"),
+            InlineKeyboardButton("👥 جروباتي",         callback_data="fg_groups"),
+            InlineKeyboardButton("📡 بث لعدة جروبات",  callback_data="fg_multi_broadcast"),
+            InlineKeyboardButton("🔁 رسالة متكررة",    callback_data="fg_auto_msg"),
+            InlineKeyboardButton("◀️ رجوع",             callback_data="back_main"),
+        )
+        return kb
+
+    @bot.callback_query_handler(func=lambda c: c.data == "menu_social")
+    def cb_menu_social(call: CallbackQuery):
+        if not is_admin(call): return
+        accounts = mgr_get_all_for_task()
+        text = (
+            f"`╔══════════════════════════╗`\n"
+            f"`║  👥  الأصدقاء والجروبات  ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"🟢 حسابات متصلة: `{len(accounts)}`\n\n"
+            f"_اختر ما تريد 👇_"
+        )
+        edit_or_send(call, text, kb_friends_groups_menu())
+        bot.answer_callback_query(call.id)
+
+    # ── عرض الأصدقاء ──
+
+    @bot.callback_query_handler(func=lambda c: c.data == "fg_friends")
+    def cb_fg_friends(call: CallbackQuery):
+        if not is_admin(call): return
+        accounts = mgr_get_all_for_task()
+        if not accounts:
+            edit_or_send(call, "❌ *لا توجد حسابات متصلة*", kb_back("menu_social"))
+            bot.answer_callback_query(call.id)
+            return
+        uid = call.from_user.id
+        set_state(uid, {"step": "fg_friends_acc"})
+        kb = InlineKeyboardMarkup(row_width=1)
+        for a in accounts:
+            kb.add(InlineKeyboardButton(
+                f"🟢 {a.get('full_name') or a['phone']} (#{a['id']})",
+                callback_data=f"fg_friends_acc_{a['id']}"
+            ))
+        kb.add(InlineKeyboardButton("❌ إلغاء", callback_data="cancel"))
+        edit_or_send(call,
+            f"`╔══════════════════════════╗`\n"
+            f"`║  🤝  قائمة الأصدقاء      ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"اختر الحساب لعرض جهات اتصاله 👇",
+            kb
+        )
+        bot.answer_callback_query(call.id)
+
+    @bot.callback_query_handler(func=lambda c: c.data.startswith("fg_friends_acc_"))
+    def cb_fg_friends_acc(call: CallbackQuery):
+        if not is_admin(call): return
+        aid = int(call.data.split("_", 3)[3])
+        actions = mgr_actions(aid)
+        if not actions:
+            bot.answer_callback_query(call.id, "❌ الحساب غير متصل")
+            return
+        bot.answer_callback_query(call.id, "⏳ جاري تحميل الأصدقاء...")
+        dialogs = arun(actions.get_dialogs(50))
+        # فلترة: الأشخاص فقط (User)
+        from telethon.tl.types import User as TLUser
+        friends = [d for d in dialogs if isinstance(d.entity, TLUser) and not getattr(d.entity, "bot", False)]
+        if not friends:
+            edit_or_send(call,
+                f"`╔══════════════════════════╗`\n"
+                f"`║  🤝  الأصدقاء             ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"📭 _لا توجد محادثات شخصية_",
+                kb_back("fg_friends")
+            )
+            return
+        lines = [
+            f"`╔══════════════════════════╗`",
+            f"`║  🤝  أصدقائي ({len(friends)})         ║`",
+            f"`╚══════════════════════════╝`\n",
+        ]
+        kb = InlineKeyboardMarkup(row_width=2)
+        for d in friends[:20]:
+            name  = f"{d.entity.first_name or ''} {d.entity.last_name or ''}".strip() or "؟"
+            uname = f"@{d.entity.username}" if getattr(d.entity, "username", None) else f"id:{d.entity.id}"
+            lines.append(f"👤 *{name}*  `{uname}`")
+            btn_data = f"fg_dm_{aid}_{d.entity.username or d.entity.id}"
+            kb.add(InlineKeyboardButton(
+                f"💬 {name[:18]}",
+                callback_data=btn_data[:64]
+            ))
+        kb.add(InlineKeyboardButton("◀️ رجوع", callback_data="fg_friends"))
+        edit_or_send(call, "\n".join(lines), kb)
+        bot.answer_callback_query(call.id)
+
+    @bot.callback_query_handler(func=lambda c: c.data.startswith("fg_dm_"))
+    def cb_fg_dm(call: CallbackQuery):
+        if not is_admin(call): return
+        parts = call.data.split("_", 3)  # fg_dm_AID_TARGET
+        aid    = int(parts[2])
+        target = parts[3]
+        uid    = call.from_user.id
+        set_state(uid, {"step": "fg_dm_text", "account_id": aid, "target": target})
+        edit_or_send(call,
+            f"`╔══════════════════════════╗`\n"
+            f"`║  💬  إرسال رسالة          ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"📝 اكتب الرسالة لـ `{target}` 👇\n\n"
+            f"_أو اضغط إلغاء_",
+            InlineKeyboardMarkup().add(InlineKeyboardButton("❌ إلغاء", callback_data="cancel"))
+        )
+        bot.answer_callback_query(call.id)
+
+    @bot.message_handler(func=lambda m: in_state(m.from_user.id, "fg_dm_text"))
+    def fg_dm_text(msg: Message):
+        uid    = msg.from_user.id
+        state  = _states.get(uid, {})
+        aid    = state.get("account_id")
+        target = state.get("target")
+        text   = msg.text
+        clear_state(uid)
+        actions = mgr_actions(aid)
+        if not actions:
+            return bot.send_message(msg.chat.id, "❌ *الحساب غير متصل*", parse_mode="Markdown")
+        m2 = bot.send_message(msg.chat.id, S.loading(f"إرسال إلى {target}"), parse_mode="Markdown")
+        ok = arun(actions.send_message(target, text))
+        kb = InlineKeyboardMarkup(row_width=2)
+        kb.add(
+            InlineKeyboardButton("🤝 الأصدقاء", callback_data="fg_friends"),
+            InlineKeyboardButton("🏠 الرئيسية", callback_data="back_main"),
+        )
+        result = (
+            f"✅ *تم الإرسال!*\n\n👤 إلى: `{target}`"
+        ) if ok else (
+            f"❌ *فشل الإرسال!*\n\n👤 الهدف: `{target}`"
+        )
+        try:
+            bot.edit_message_text(result, m2.chat.id, m2.message_id, parse_mode="Markdown", reply_markup=kb)
+        except Exception:
+            bot.send_message(msg.chat.id, result, parse_mode="Markdown", reply_markup=kb)
+
+    # ── عرض الجروبات ──
+
+    @bot.callback_query_handler(func=lambda c: c.data == "fg_groups")
+    def cb_fg_groups(call: CallbackQuery):
+        if not is_admin(call): return
+        accounts = mgr_get_all_for_task()
+        if not accounts:
+            edit_or_send(call, "❌ *لا توجد حسابات متصلة*", kb_back("menu_social"))
+            bot.answer_callback_query(call.id)
+            return
+        uid = call.from_user.id
+        set_state(uid, {"step": "fg_groups_acc"})
+        kb = InlineKeyboardMarkup(row_width=1)
+        for a in accounts:
+            kb.add(InlineKeyboardButton(
+                f"🟢 {a.get('full_name') or a['phone']} (#{a['id']})",
+                callback_data=f"fg_groups_acc_{a['id']}"
+            ))
+        kb.add(InlineKeyboardButton("❌ إلغاء", callback_data="cancel"))
+        edit_or_send(call,
+            f"`╔══════════════════════════╗`\n"
+            f"`║  👥  قائمة الجروبات      ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"اختر الحساب لعرض جروباته 👇",
+            kb
+        )
+        bot.answer_callback_query(call.id)
+
+    @bot.callback_query_handler(func=lambda c: c.data.startswith("fg_groups_acc_"))
+    def cb_fg_groups_acc(call: CallbackQuery):
+        if not is_admin(call): return
+        aid = int(call.data.split("_", 3)[3])
+        actions = mgr_actions(aid)
+        if not actions:
+            bot.answer_callback_query(call.id, "❌ الحساب غير متصل")
+            return
+        bot.answer_callback_query(call.id, "⏳ جاري تحميل الجروبات...")
+        dialogs = arun(actions.get_dialogs(50))
+        from telethon.tl.types import Chat, Channel
+        groups = [d for d in dialogs if isinstance(d.entity, (Chat, Channel))]
+        if not groups:
+            edit_or_send(call,
+                f"`╔══════════════════════════╗`\n"
+                f"`║  👥  الجروبات             ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"📭 _لا توجد جروبات_",
+                kb_back("fg_groups")
+            )
+            return
+        lines = [
+            f"`╔══════════════════════════╗`",
+            f"`║  👥  جروباتي ({len(groups)})         ║`",
+            f"`╚══════════════════════════╝`\n",
+        ]
+        kb = InlineKeyboardMarkup(row_width=2)
+        for d in groups[:20]:
+            title = getattr(d.entity, "title", "؟")
+            uname = f"@{d.entity.username}" if getattr(d.entity, "username", None) else f"id:{d.entity.id}"
+            lines.append(f"👥 *{title}*  `{uname}`")
+            target = d.entity.username or str(d.entity.id)
+            btn_data = f"fg_grp_{aid}_{target}"
+            kb.add(InlineKeyboardButton(
+                f"💬 {title[:18]}",
+                callback_data=btn_data[:64]
+            ))
+        kb.add(InlineKeyboardButton("◀️ رجوع", callback_data="fg_groups"))
+        edit_or_send(call, "\n".join(lines), kb)
+        bot.answer_callback_query(call.id)
+
+    @bot.callback_query_handler(func=lambda c: c.data.startswith("fg_grp_"))
+    def cb_fg_grp(call: CallbackQuery):
+        if not is_admin(call): return
+        parts  = call.data.split("_", 3)  # fg_grp_AID_TARGET
+        aid    = int(parts[2])
+        target = parts[3]
+        uid    = call.from_user.id
+        set_state(uid, {"step": "fg_grp_text", "account_id": aid, "target": target})
+        edit_or_send(call,
+            f"`╔══════════════════════════╗`\n"
+            f"`║  💬  إرسال للجروب         ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"📝 اكتب الرسالة للجروب `{target}` 👇",
+            InlineKeyboardMarkup().add(InlineKeyboardButton("❌ إلغاء", callback_data="cancel"))
+        )
+        bot.answer_callback_query(call.id)
+
+    @bot.message_handler(func=lambda m: in_state(m.from_user.id, "fg_grp_text"))
+    def fg_grp_text(msg: Message):
+        uid    = msg.from_user.id
+        state  = _states.get(uid, {})
+        aid    = state.get("account_id")
+        target = state.get("target")
+        text   = msg.text
+        clear_state(uid)
+        actions = mgr_actions(aid)
+        if not actions:
+            return bot.send_message(msg.chat.id, "❌ *الحساب غير متصل*", parse_mode="Markdown")
+        m2 = bot.send_message(msg.chat.id, S.loading(f"إرسال إلى {target}"), parse_mode="Markdown")
+        ok = arun(actions.send_message(target, text))
+        kb = InlineKeyboardMarkup(row_width=2)
+        kb.add(
+            InlineKeyboardButton("👥 الجروبات", callback_data="fg_groups"),
+            InlineKeyboardButton("🏠 الرئيسية", callback_data="back_main"),
+        )
+        result = f"✅ *تم الإرسال للجروب!*\n\n👥 `{target}`" if ok else f"❌ *فشل الإرسال!*\n\n👥 `{target}`"
+        try:
+            bot.edit_message_text(result, m2.chat.id, m2.message_id, parse_mode="Markdown", reply_markup=kb)
+        except Exception:
+            bot.send_message(msg.chat.id, result, parse_mode="Markdown", reply_markup=kb)
+
+    # ══════════════════════════════════════════
+    #  📡 بث لأكتر من جروب في نفس الوقت
+    # ══════════════════════════════════════════
+
+    @bot.callback_query_handler(func=lambda c: c.data == "fg_multi_broadcast")
+    def cb_fg_multi_broadcast(call: CallbackQuery):
+        if not is_admin(call): return
+        accounts = mgr_get_all_for_task()
+        if not accounts:
+            edit_or_send(call, "❌ *لا توجد حسابات متصلة*", kb_back("menu_social"))
+            bot.answer_callback_query(call.id)
+            return
+        uid = call.from_user.id
+        set_state(uid, {"step": "mb_pick_acc"})
+        kb = InlineKeyboardMarkup(row_width=1)
+        for a in accounts:
+            kb.add(InlineKeyboardButton(
+                f"🟢 {a.get('full_name') or a['phone']} (#{a['id']})",
+                callback_data=f"mb_acc_{a['id']}"
+            ))
+        kb.add(InlineKeyboardButton("❌ إلغاء", callback_data="cancel"))
+        edit_or_send(call,
+            f"`╔══════════════════════════╗`\n"
+            f"`║  📡  بث لعدة جروبات 1/3  ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"👤 اختر الحساب اللي هيبعت منه 👇",
+            kb
+        )
+        bot.answer_callback_query(call.id)
+
+    @bot.callback_query_handler(func=lambda c: c.data.startswith("mb_acc_"))
+    def cb_mb_acc(call: CallbackQuery):
+        uid = call.from_user.id
+        if not get_state(uid): return
+        aid = int(call.data.split("_", 2)[2])
+        _states[uid]["account_id"] = aid
+        _states[uid]["step"] = "mb_targets"
+        edit_or_send(call,
+            f"`╔══════════════════════════╗`\n"
+            f"`║  📡  بث لعدة جروبات 2/3  ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"🎯 أرسل الجروبات المستهدفة (كل واحد في سطر):\n\n"
+            f"مثال:\n"
+            f"`@group1`\n"
+            f"`@group2`\n"
+            f"`-1001234567890`\n\n"
+            f"_أو اضغط إلغاء_",
+            InlineKeyboardMarkup().add(InlineKeyboardButton("❌ إلغاء", callback_data="cancel"))
+        )
+        bot.answer_callback_query(call.id)
+
+    @bot.message_handler(func=lambda m: in_state(m.from_user.id, "mb_targets"))
+    def mb_step_targets(msg: Message):
+        uid  = msg.from_user.id
+        targets = [t.strip() for t in msg.text.strip().splitlines() if t.strip()]
+        if not targets:
+            return bot.reply_to(msg, "❌ أرسل جروب واحد على الأقل")
+        _states[uid]["targets"] = targets
+        _states[uid]["step"]    = "mb_text"
+        bot.send_message(msg.chat.id,
+            f"`╔══════════════════════════╗`\n"
+            f"`║  📡  بث لعدة جروبات 3/3  ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"✅ *{len(targets)}* جروب محدد\n\n"
+            f"📝 اكتب الرسالة اللي هتتبعت 👇",
+            parse_mode="Markdown"
+        )
+
+    @bot.message_handler(func=lambda m: in_state(m.from_user.id, "mb_text"))
+    def mb_step_text(msg: Message):
+        uid     = msg.from_user.id
+        state   = _states.get(uid, {})
+        aid     = state.get("account_id")
+        targets = state.get("targets", [])
+        text    = msg.text
+        clear_state(uid)
+        actions = mgr_actions(aid)
+        if not actions:
+            return bot.send_message(msg.chat.id, "❌ *الحساب غير متصل*", parse_mode="Markdown")
+        m2 = bot.send_message(msg.chat.id,
+            f"`╔══════════════════════════╗`\n"
+            f"`║  📡  جاري الإرسال...      ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"⏳ _{len(targets)} جروب..._",
+            parse_mode="Markdown"
+        )
+        results = arun(actions.send_to_many(targets, text))
+        ok   = sum(1 for v in results.values() if v == "success")
+        fail = len(results) - ok
+        bar  = S.progress_bar(ok, len(targets))
+        pct  = round(ok / len(targets) * 100) if targets else 0
+        lines = [
+            f"`╔══════════════════════════╗`",
+            f"`║  📡  نتيجة البث           ║`",
+            f"`╚══════════════════════════╝`\n",
+            f"✅ نجح: `{ok}` | ❌ فشل: `{fail}`",
+            f"`{bar}` `{pct}%`\n",
+        ]
+        for t, status in results.items():
+            icon = "✅" if status == "success" else "❌"
+            lines.append(f"{icon} `{t}`")
+        kb = InlineKeyboardMarkup(row_width=2)
+        kb.add(
+            InlineKeyboardButton("📡 بث جديد",  callback_data="fg_multi_broadcast"),
+            InlineKeyboardButton("🏠 الرئيسية", callback_data="back_main"),
+        )
+        try:
+            bot.edit_message_text("\n".join(lines), m2.chat.id, m2.message_id, parse_mode="Markdown", reply_markup=kb)
+        except Exception:
+            bot.send_message(msg.chat.id, "\n".join(lines), parse_mode="Markdown", reply_markup=kb)
+
+    # ══════════════════════════════════════════
+    #  🔁 رسالة متكررة تلقائياً
+    # ══════════════════════════════════════════
+
+    @bot.callback_query_handler(func=lambda c: c.data == "fg_auto_msg")
+    def cb_fg_auto_msg(call: CallbackQuery):
+        if not is_admin(call): return
+        accounts = mgr_get_all_for_task()
+        if not accounts:
+            edit_or_send(call, "❌ *لا توجد حسابات متصلة*", kb_back("menu_social"))
+            bot.answer_callback_query(call.id)
+            return
+        uid = call.from_user.id
+        set_state(uid, {"step": "am_pick_acc"})
+        kb = InlineKeyboardMarkup(row_width=1)
+        for a in accounts:
+            kb.add(InlineKeyboardButton(
+                f"🟢 {a.get('full_name') or a['phone']} (#{a['id']})",
+                callback_data=f"am_acc_{a['id']}"
+            ))
+        kb.add(InlineKeyboardButton("❌ إلغاء", callback_data="cancel"))
+        edit_or_send(call,
+            f"`╔══════════════════════════╗`\n"
+            f"`║  🔁  رسالة متكررة 1/4    ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"👤 اختر الحساب اللي هيبعت منه 👇",
+            kb
+        )
+        bot.answer_callback_query(call.id)
+
+    @bot.callback_query_handler(func=lambda c: c.data.startswith("am_acc_"))
+    def cb_am_acc(call: CallbackQuery):
+        uid = call.from_user.id
+        if not get_state(uid): return
+        aid = int(call.data.split("_", 2)[2])
+        _states[uid]["account_id"] = aid
+        _states[uid]["step"] = "am_target"
+        edit_or_send(call,
+            f"`╔══════════════════════════╗`\n"
+            f"`║  🔁  رسالة متكررة 2/4    ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"🎯 أرسل الهدف (جروب أو شخص):\n\n"
+            f"• `@group` أو `@username`\n"
+            f"• Chat ID: `-1001234567890`",
+            InlineKeyboardMarkup().add(InlineKeyboardButton("❌ إلغاء", callback_data="cancel"))
+        )
+        bot.answer_callback_query(call.id)
+
+    @bot.message_handler(func=lambda m: in_state(m.from_user.id, "am_target"))
+    def am_step_target(msg: Message):
+        uid = msg.from_user.id
+        _states[uid]["target"] = msg.text.strip()
+        _states[uid]["step"]   = "am_text"
+        bot.send_message(msg.chat.id,
+            f"`╔══════════════════════════╗`\n"
+            f"`║  🔁  رسالة متكررة 3/4    ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"📝 اكتب الرسالة 👇",
+            parse_mode="Markdown"
+        )
+
+    @bot.message_handler(func=lambda m: in_state(m.from_user.id, "am_text"))
+    def am_step_text(msg: Message):
+        uid = msg.from_user.id
+        _states[uid]["content"] = msg.text
+        _states[uid]["step"]    = "am_interval"
+        bot.send_message(msg.chat.id,
+            f"`╔══════════════════════════╗`\n"
+            f"`║  🔁  رسالة متكررة 4/4    ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"⏱️ كل قد إيه هتتبعت الرسالة؟\n\n"
+            f"• `minutes=30` — كل 30 دقيقة\n"
+            f"• `hours=1` — كل ساعة\n"
+            f"• `hours=2 minutes=30` — كل ساعتين ونص\n"
+            f"• `days=1` — كل يوم",
+            parse_mode="Markdown"
+        )
+
+    @bot.message_handler(func=lambda m: in_state(m.from_user.id, "am_interval"))
+    def am_step_interval(msg: Message):
+        uid   = msg.from_user.id
+        state = _states.get(uid, {})
+        text  = msg.text.strip()
+        try:
+            tdata = {}
+            for part in text.split():
+                if "=" in part:
+                    k, v = part.split("=", 1)
+                    k = k.strip().lower()
+                    if k in ["weeks", "days", "hours", "minutes", "seconds"]:
+                        tdata[k] = int(v.strip())
+            if not tdata:
+                raise ValueError("لم يُتعرف على وحدة زمنية")
+        except Exception as e:
+            return bot.reply_to(msg, f"❌ {e}\n\nمثال: `minutes=30` أو `hours=1`", parse_mode="Markdown")
+
+        aid     = state.get("account_id")
+        target  = state.get("target")
+        content = state.get("content")
+        clear_state(uid)
+
+        # إنشاء مهمة وجدول آلياً
+        try:
+            tid = arun(db_add_task(
+                f"رسالة متكررة → {target[:15]}",
+                aid, "send_message", target, content, created_by=uid
+            ))
+            sid = arun(sched_add(tid, "interval", tdata, max_runs=-1))
+            # تحويل الفترة لنص مقروء
+            parts_txt = []
+            for k, v in tdata.items():
+                parts_txt.append(f"{v} {'ساعة' if k=='hours' else 'يوم' if k=='days' else 'دقيقة' if k=='minutes' else k}")
+            interval_txt = " و".join(parts_txt)
+            kb = InlineKeyboardMarkup(row_width=2)
+            kb.add(
+                InlineKeyboardButton("📅 الجداول",   callback_data="menu_schedules"),
+                InlineKeyboardButton("🏠 الرئيسية", callback_data="back_main"),
+            )
+            bot.send_message(msg.chat.id,
+                f"`╔══════════════════════════╗`\n"
+                f"`║  ✅  تم إنشاء الجدول!     ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"🎯 الهدف: `{target}`\n"
+                f"⏱️ كل: *{interval_txt}*\n"
+                f"🔁 التكرار: *لانهائي* ♾️\n"
+                f"🆔 المهمة: `{tid}` | الجدول: `{sid}`\n\n"
+                f"🚀 _الرسالة ستُرسل تلقائياً الآن!_",
+                parse_mode="Markdown", reply_markup=kb
+            )
+        except Exception as e:
+            bot.send_message(msg.chat.id, S.error(str(e)), parse_mode="Markdown")
+
+    # ── تعديل القائمة الرئيسية لإضافة زر الأصدقاء والجروبات ──
+
+
     @bot.message_handler(commands=["showsessions"])
     def cmd_showsessions(msg: Message):
         if not is_admin(msg): return
         if not SESSION_ACCOUNTS:
             return bot.reply_to(msg,
-                "⚠️ *لا توجد Session Strings في متغيرات البيئة*\n\n"
-                "_أضف متغيرات بالشكل: `SESSION_1`, `SESSION_2`, ..._",
+                f"`╔══════════════════════════╗`\n"
+                f"`║  🔑  Session Strings       ║`\n"
+                f"`╚══════════════════════════╝`\n\n"
+                f"⚠️ _لا توجد Session Strings في متغيرات البيئة_\n\n"
+                f"أضف متغيرات بالشكل:\n`SESSION_1`, `SESSION_2`, ...",
                 parse_mode="Markdown"
             )
-        lines = [f"🔑 *Session Strings المحملة*\n`{'━'*28}`\n"]
+        lines = [
+            f"`╔══════════════════════════╗`",
+            f"`║  🔑  Session Strings       ║`",
+            f"`╚══════════════════════════╝`\n",
+        ]
         for num, ss in SESSION_ACCOUNTS.items():
             client = next((ub for ub in _clients.values() if ub.phone == f"ENV_SESSION_{num}"), None)
-            status = S.status_badge(bool(client.is_connected) if client else False)
-            name = client.display_name() if client else "—"
-            db_id = client.account_id if client else "—"
+            status = "🟢 متصل" if (client and client.is_connected) else "🔴 منفصل"
+            name   = client.display_name() if client else "—"
+            db_id  = client.account_id if client else "—"
             preview = ss[:8] + "..." + ss[-4:] if len(ss) > 14 else ss
             lines.append(
-                f"▸ *SESSION\\_{num}*\n"
+                f"🔑 *SESSION\\_{num}*\n"
                 f"  👤 {name} | {status}\n"
-                f"  🆔 `{db_id}`\n"
-                f"  🔐 `{preview}`\n"
+                f"  🆔 `{db_id}` | 🔐 `{preview}`"
             )
         bot.send_message(msg.chat.id, "\n".join(lines), parse_mode="Markdown")
 
@@ -2855,18 +4074,19 @@ def setup_bot():
     def cmd_reloadsessions(msg: Message):
         if not is_admin(msg): return
         if not SESSION_ACCOUNTS:
-            return bot.reply_to(msg, "⚠️ لا توجد SESSION_ متغيرات في البيئة", parse_mode="Markdown")
+            return bot.reply_to(msg,
+                "⚠️ _لا توجد SESSION\\_ متغيرات في البيئة_",
+                parse_mode="Markdown"
+            )
         sent_msg = bot.reply_to(msg,
             f"🔄 *إعادة تحميل {len(SESSION_ACCOUNTS)} Session String...*",
             parse_mode="Markdown"
         )
-        # فصل الجلسات البيئية القديمة أولاً
         to_remove = [aid for aid, ub in list(_clients.items()) if ub.phone.startswith("ENV_SESSION_")]
         for aid in to_remove:
             arun(_clients[aid].disconnect())
             _clients.pop(aid, None)
             _actions.pop(aid, None)
-        # إعادة تحميل من متغيرات البيئة الحالية
         fresh = load_all_sessions()
         SESSION_ACCOUNTS.clear()
         SESSION_ACCOUNTS.update(fresh)
@@ -2876,17 +4096,39 @@ def setup_bot():
         ))
         ok = sum(1 for r in results if r is True)
         bot.edit_message_text(
-            f"✅ *إعادة التحميل اكتملت*\n\n"
-            f"🔑 إجمالي: `{len(SESSION_ACCOUNTS)}`\n"
-            f"🟢 متصل: `{ok}`\n"
-            f"🔴 فشل: `{len(SESSION_ACCOUNTS) - ok}`",
+            f"`╔══════════════════════════╗`\n"
+            f"`║  🔄  إعادة التحميل        ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"🔑 الإجمالي: `{len(SESSION_ACCOUNTS)}`\n"
+            f"🟢 متصل:    `{ok}`\n"
+            f"🔴 فشل:     `{len(SESSION_ACCOUNTS) - ok}`",
             sent_msg.chat.id, sent_msg.message_id, parse_mode="Markdown"
         )
+
+    @bot.message_handler(commands=["restart"])
+    def cmd_restart(msg: Message):
+        if not is_admin(msg): return
+        bot.send_message(msg.chat.id,
+            f"`╔══════════════════════════╗`\n"
+            f"`║  🔁  إعادة تشغيل البوت   ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"⏳ _جاري إعادة التشغيل..._",
+            parse_mode="Markdown"
+        )
+        logger.info(f"🔁 إعادة تشغيل بطلب من {msg.from_user.id}")
+        def _restart():
+            import time as _t
+            _t.sleep(1.5)
+            try: _scheduler.shutdown(wait=False)
+            except Exception: pass
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+        threading.Thread(target=_restart, daemon=True).start()
 
     @bot.message_handler(func=lambda m: True)
     def fallback(msg: Message):
         if not is_admin(msg): return
-        # تجاهل الرسائل غير المعروفة
+        # تجاهل الرسائل غير المعروفة بصمت
+
 
     logger.info("✅ البوت جاهز مع جميع الأوامر")
 
@@ -2895,9 +4137,9 @@ def setup_bot():
 # ══════════════════════════════════════════════
 
 async def startup():
-    logger.info("╔══════════════════════════════════╗")
-    logger.info(f"║  🤖 {BOT_NAME} v{VERSION}".ljust(34) + "║")
-    logger.info("╚══════════════════════════════════╝")
+    logger.info("╔══════════════════════════════════════╗")
+    logger.info(f"║  ⚡  TG Manager Pro v{VERSION}         ║")
+    logger.info("╚══════════════════════════════════════╝")
     await db_connect()
     await mgr_load_all()
     await sched_load_all()
@@ -2910,30 +4152,36 @@ async def _send_startup_message():
         return
     connected = mgr_get_all_for_task()
     now = datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S")
-    divider = "\u2501" * 28
+    jobs = len(sched_jobs())
     if connected:
-        lines = []
-        for a in connected:
-            tag = " \U0001f511" if a["is_env"] else ""
-            lines.append(f"  \U0001f7e2 {a['full_name']} (#{a['id']}){tag}")
-        acc_block = "\n".join(lines)
+        acc_lines = "\n".join(
+            f"  🟢 {a['full_name']} `(#{a['id']})`{'  🔑' if a.get('is_env') else ''}"
+            for a in connected
+        )
         text = (
-            "\U0001f916 *" + BOT_NAME + " \u0634\u063a\u0627\u0644!*\n"
-            "`" + divider + "`\n\n"
-            "\U0001f550 `" + now + "`\n"
-            "\u2705 *" + str(len(connected)) + " \u062d\u0633\u0627\u0628 \u0645\u062a\u0635\u0644:*\n"
-            + acc_block
+            f"`╔══════════════════════════╗`\n"
+            f"`║  🚀  TG Manager Pro v{VERSION}  ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"✅ *البوت شغّال!*\n"
+            f"🕐 `{now}`\n"
+            f"📅 جداول نشطة: `{jobs}`\n\n"
+            f"*{len(connected)} حساب متصل:*\n"
+            f"{acc_lines}"
         )
     else:
         text = (
-            "\U0001f916 *" + BOT_NAME + " \u0634\u063a\u0627\u0644!*\n"
-            "`" + divider + "`\n\n"
-            "\U0001f550 `" + now + "`\n"
-            "\u26a0\ufe0f \u0644\u0627 \u062a\u0648\u062c\u062f \u062d\u0633\u0627\u0628\u0627\u062a \u0645\u062a\u0635\u0644\u0629 \u062d\u0627\u0644\u064a\u0627\u064b"
+            f"`╔══════════════════════════╗`\n"
+            f"`║  🚀  TG Manager Pro v{VERSION}  ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"✅ *البوت شغّال!*\n"
+            f"🕐 `{now}`\n\n"
+            f"⚠️ _لا توجد حسابات متصلة حالياً_\n"
+            f"استخدم قائمة الحسابات لإضافة حساب"
         )
     for admin_id in ADMIN_IDS:
         try:
-            bot.send_message(admin_id, text, parse_mode="Markdown")
+            bot.send_message(admin_id, text, parse_mode="Markdown", reply_markup=kb_main_menu())
+            logger.info(f"✅ رسالة البدء أُرسلت لـ {admin_id}")
         except Exception as e:
             logger.warning(f"startup msg failed for {admin_id}: {e}")
 
@@ -2971,13 +4219,16 @@ def main():
         t = threading.Thread(target=run_bot, daemon=True)
         t.start()
         import time as _time
-        for _ in range(15):
+        # انتظر حتى يتصل البوت
+        for _ in range(20):
             _time.sleep(1)
             try:
                 bot.get_me()
+                logger.info("✅ البوت متصل بـ Telegram API")
                 break
             except Exception:
                 pass
+        # أرسل رسالة البدء لجميع الأدمنز
         _loop.run_until_complete(_send_startup_message())
 
     def _sig(sig, frame):
