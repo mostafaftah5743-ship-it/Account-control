@@ -1883,17 +1883,16 @@ def setup_bot():
     @bot.callback_query_handler(func=lambda c: c.data == "task_add")
     def cb_task_add(call: CallbackQuery):
         if not is_admin(call): return
-        accounts = arun(db_get_all_accounts(active_only=True))
+        accounts = mgr_get_all_for_task()
         if not accounts:
-            edit_or_send(call, "❌ *لا توجد حسابات نشطة*\nأضف حسابًا أولًا", kb_back("menu_accounts"))
+            edit_or_send(call, "❌ *لا توجد حسابات نشطة*\nأضف حسابًا أولًا أو تحقق من SESSION_ في متغيرات البيئة", kb_back("menu_accounts"))
             bot.answer_callback_query(call.id)
             return
         uid = call.from_user.id
         set_state(uid, {"step":"task_account"})
         kb = InlineKeyboardMarkup(row_width=1)
         for a in accounts:
-            connected = mgr_is_connected(a["id"])
-            icon = "🟢" if connected else "🟡"
+            icon = "🟢"
             kb.add(InlineKeyboardButton(
                 f"{icon} {a.get('full_name') or a['phone']} (#{a['id']})",
                 callback_data=f"task_acc_pick_{a['id']}"
