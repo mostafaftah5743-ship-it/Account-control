@@ -1066,24 +1066,39 @@ async def mgr_load_all():
         logger.info("لا توجد Session Strings في متغيرات البيئة")
 
 async def load_session_from_env(session_num: str, session_string: str) -> bool:
-    """تحميل حساب من Session String في متغيرات البيئة"""
-    # توليد ID وهمي فريد للحسابات البيئية (سالب لتمييزها)
-    fake_id = -(abs(hash(session_string)) % 999999 + 1)
-    # تجنب التكرار إذا كان محمّلاً بالفعل
-    if fake_id in _clients:
-        return _clients[fake_id].is_connected
+    """تحميل حساب من Session String في متغيرات البيئة وتسجيله في DB إن لم يكن موجوداً"""
     phone_label = f"ENV_SESSION_{session_num}"
-    ub = UserBotClient(fake_id, phone_label, DEFAULT_API_ID, DEFAULT_API_HASH, f"env_session_{session_num}")
+    ub = UserBotClient(0, phone_label, DEFAULT_API_ID, DEFAULT_API_HASH, f"env_session_{session_num}")
     try:
-        if await ub.connect_with_string(session_string):
-            async with _mgr_lock:
-                _clients[fake_id] = ub
-                _actions[fake_id] = UserBotActions(ub)
-            logger.info(f"✅ SESSION_{session_num} ({ub.display_name()}) متصل — ID: {fake_id}")
-            return True
-        else:
+        if not await ub.connect_with_string(session_string):
             logger.warning(f"⚠️ SESSION_{session_num} فشل الاتصال")
             return False
+
+        me = ub.me
+        username  = me.username if me else None
+        full_name = f"{me.first_name or ''} {me.last_name or ''}".strip() if me else phone_label
+
+        # تحقق إذا كان الحساب موجوداً في DB مسبقاً
+        cur = await _db.execute("SELECT id FROM accounts WHERE session_name=?", (f"env_session_{session_num}",))
+        row = await cur.fetchone()
+        if row:
+            real_id = row[0]
+            # تحديث بيانات الحساب
+            await db_update_account(real_id, username=username, full_name=full_name, is_active=1)
+        else:
+            real_id = await db_add_account(
+                phone_label, str(DEFAULT_API_ID), DEFAULT_API_HASH,
+                f"env_session_{session_num}",
+                username=username, full_name=full_name,
+                notes=f"Session String #{session_num}"
+            )
+
+        ub.account_id = real_id
+        async with _mgr_lock:
+            _clients[real_id] = ub
+            _actions[real_id] = UserBotActions(ub)
+        logger.info(f"✅ SESSION_{session_num} ({full_name}) متصل — DB ID: {real_id}")
+        return True
     except Exception as e:
         logger.error(f"❌ SESSION_{session_num} خطأ: {e}")
         return False
@@ -1146,6 +1161,7 @@ async def mgr_remove(aid: int):
         await _clients[aid].disconnect()
         _clients.pop(aid, None)
         _actions.pop(aid, None)
+    _buckets.pop(aid, None)  # FIX: تنظيف bucket الخاص بالحساب
     await db_delete_account(aid)
 
 def mgr_actions(aid: int) -> Optional[UserBotActions]:
@@ -1178,7 +1194,7 @@ def mgr_get_all_for_task() -> List[dict]:
             "phone":     ub.phone,
             "full_name": ub.display_name(),
             "username":  ub._me.username if ub._me else None,
-            "is_env":    aid < 0,
+            "is_env":    ub.phone.startswith("ENV_SESSION_"),
         })
     return result
 
@@ -2078,7 +2094,7 @@ def setup_bot():
         for j in jobs[:5]:
             kb.add(InlineKeyboardButton(
                 f"🗑 حذف: {j['name'][:20]}",
-                callback_data=f"sched_delete_{j['id'].lstrip('s')}"
+                callback_data=f"sched_delete_{j['id'][1:]}"  # FIX: بدل lstrip الخطرة
             ))
         kb.add(InlineKeyboardButton("◀️ رجوع", callback_data="menu_schedules"))
         edit_or_send(call, "\n".join(lines), kb)
@@ -2428,6 +2444,71 @@ def setup_bot():
         edit_or_send(call, "\n".join(lines), kb_back("menu_protection"))
         bot.answer_callback_query(call.id)
 
+    # FIX: handler مفقود لـ bl_remove
+    @bot.callback_query_handler(func=lambda c: c.data == "bl_remove")
+    def cb_bl_remove(call: CallbackQuery):
+        if not is_admin(call): return
+        uid = call.from_user.id
+        set_state(uid, {"step": "bl_remove_target"})
+        edit_or_send(call,
+            f"{S.header('إزالة من القائمة السوداء', S.SHIELD)}\n\n"
+            f"أرسل الهدف المراد إزالته:\n`@username` أو `-1001234`"
+        )
+        bot.answer_callback_query(call.id)
+
+    @bot.message_handler(func=lambda m: in_state(m.from_user.id, "bl_remove_target"))
+    def bl_step_remove(msg: Message):
+        uid    = msg.from_user.id
+        target = msg.text.strip()
+        clear_state(uid)
+        arun(db_remove_blacklist(target))
+        bot.send_message(msg.chat.id,
+            f"✅ *تم إزالة* `{target}` *من القائمة السوداء*",
+            parse_mode="Markdown",
+            reply_markup=kb_back("menu_protection")
+        )
+
+    # FIX: handler مفقود لـ acc_tasks
+    @bot.callback_query_handler(func=lambda c: c.data.startswith("acc_tasks_"))
+    def cb_acc_tasks(call: CallbackQuery):
+        if not is_admin(call): return
+        aid   = int(call.data.split("_")[-1])
+        tasks = arun(db_get_all_tasks(account_id=aid))
+        if not tasks:
+            edit_or_send(call,
+                f"{S.header(f'مهام الحساب {aid}', S.TASK)}\n\n📭 _لا توجد مهام لهذا الحساب_",
+                kb_back(f"acc_detail_{aid}")
+            )
+            bot.answer_callback_query(call.id)
+            return
+        lines = [f"{S.header(f'مهام الحساب {aid}', S.TASK)}\n"]
+        kb    = InlineKeyboardMarkup(row_width=2)
+        for t in tasks[:8]:
+            icon = S.task_type_icon(t["task_type"])
+            lines.append(
+                f"\n{icon} `{t['id']}` *{t['name']}*\n"
+                f"  🎯 `{t['target']}` • {S.task_type_ar(t['task_type'])}"
+            )
+            kb.add(InlineKeyboardButton(
+                f"{icon} {t['name'][:20]}",
+                callback_data=f"task_detail_{t['id']}"
+            ))
+        kb.add(InlineKeyboardButton("◀️ رجوع", callback_data=f"acc_detail_{aid}"))
+        edit_or_send(call, "\n".join(lines), kb)
+        bot.answer_callback_query(call.id)
+
+    # FIX: handler مفقود لـ task_edit
+    @bot.callback_query_handler(func=lambda c: c.data.startswith("task_edit_"))
+    def cb_task_edit(call: CallbackQuery):
+        if not is_admin(call): return
+        tid = int(call.data.split("_")[-1])
+        bot.answer_callback_query(call.id, "⚠️ تعديل المهام قيد التطوير")
+        edit_or_send(call,
+            f"⚠️ *ميزة التعديل قيد التطوير*\n\n"
+            f"يمكنك حذف المهمة `{tid}` وإنشاء واحدة جديدة بدلاً منها.",
+            kb_back(f"task_detail_{tid}")
+        )
+
     # ══════════════════════════════════════════
     #  🔔 الإشعارات
     # ══════════════════════════════════════════
@@ -2628,6 +2709,89 @@ def setup_bot():
         arun(db_delete_task(tid))
         bot.reply_to(msg, f"✅ *تم حذف المهمة* `{tid}`", parse_mode="Markdown")
 
+    @bot.message_handler(commands=["update"])
+    def cmd_update(msg: Message):
+        """تحديث ملف البوت بدون GitHub"""
+        if not is_admin(msg): return
+        bot.send_message(msg.chat.id,
+            f"`{'━'*28}`\n"
+            f"  🔄 *تحديث ملف البوت*\n"
+            f"`{'━'*28}`\n\n"
+            f"📤 أرسل ملف `.py` الجديد الآن\n\n"
+            f"_سيتم استبدال الملف الحالي وإعادة التشغيل تلقائيًا_",
+            parse_mode="Markdown"
+        )
+        set_state(msg.from_user.id, {"step": "awaiting_update_file"})
+
+    @bot.message_handler(
+        content_types=["document"],
+        func=lambda m: in_state(m.from_user.id, "awaiting_update_file")
+    )
+    def handle_update_file(msg: Message):
+        """استقبال الملف الجديد وتطبيق التحديث"""
+        if not is_admin(msg): return
+        uid = msg.from_user.id
+        doc = msg.document
+
+        # التحقق من أن الملف Python
+        if not (doc.file_name or "").endswith(".py"):
+            bot.reply_to(msg, "❌ يجب أن يكون الملف بصيغة `.py`", parse_mode="Markdown")
+            return
+
+        sent = bot.reply_to(msg, "⏳ _جاري تحميل الملف..._", parse_mode="Markdown")
+
+        try:
+            # تحميل الملف
+            file_info = bot.get_file(doc.file_id)
+            file_data = bot.download_file(file_info.file_path)
+
+            # التحقق من صحة الكود (syntax check)
+            try:
+                compile(file_data, doc.file_name, "exec")
+            except SyntaxError as e:
+                clear_state(uid)
+                bot.edit_message_text(
+                    f"❌ *خطأ في صياغة الكود!*\n\n`{e}`\n\n_الملف القديم محتفظ به_",
+                    sent.chat.id, sent.message_id, parse_mode="Markdown"
+                )
+                return
+
+            # حساب مسار الملف الحالي
+            current_file = Path(__file__).resolve()
+            backup_file  = current_file.with_suffix(".py.bak")
+
+            # نسخ احتياطية
+            import shutil
+            shutil.copy2(current_file, backup_file)
+
+            # كتابة الملف الجديد
+            current_file.write_bytes(file_data)
+
+            clear_state(uid)
+            bot.edit_message_text(
+                f"✅ *تم التحديث بنجاح!*\n\n"
+                f"📁 الملف: `{doc.file_name}`\n"
+                f"💾 حجم: `{len(file_data):,}` byte\n"
+                f"📂 نسخة احتياطية: `{backup_file.name}`\n\n"
+                f"🔄 *جاري إعادة التشغيل...*",
+                sent.chat.id, sent.message_id, parse_mode="Markdown"
+            )
+
+            logger.info(f"✅ تحديث ناجح من {msg.from_user.id} — إعادة تشغيل...")
+
+            # إعادة التشغيل
+            import time as _t
+            _t.sleep(1.5)
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+
+        except Exception as e:
+            clear_state(uid)
+            logger.error(f"فشل التحديث: {e}")
+            bot.edit_message_text(
+                f"❌ *فشل التحديث*\n\n`{e}`",
+                sent.chat.id, sent.message_id, parse_mode="Markdown"
+            )
+
     @bot.message_handler(commands=["help"])
     def cmd_help(msg: Message):
         if not is_admin(msg): return
@@ -2651,6 +2815,8 @@ def setup_bot():
             f"/stats — إحصائيات\n"
             f"/ping — اختبار\n"
             f"/menu — القائمة الرئيسية\n\n"
+            f"*🔄 التحديث:*\n"
+            f"/update — تحديث ملف البوت\n\n"
             f"*🔑 Session Strings:*\n"
             f"/showsessions — عرض جلسات البيئة\n"
             f"/reloadsessions — إعادة تحميل الجلسات",
@@ -2675,6 +2841,7 @@ def setup_bot():
             BotCommand("dialogs",        "💬 عرض المحادثات"),
             BotCommand("showsessions",   "🔑 عرض Session Strings"),
             BotCommand("reloadsessions", "🔄 إعادة تحميل الجلسات"),
+            BotCommand("update",         "🔄 تحديث ملف البوت"),
             BotCommand("help",           "❓ المساعدة"),
         ])
         bot.reply_to(msg, "✅ *تم تعيين الأوامر بنجاح!*", parse_mode="Markdown")
@@ -2691,15 +2858,15 @@ def setup_bot():
             )
         lines = [f"🔑 *Session Strings المحملة*\n`{'━'*28}`\n"]
         for num, ss in SESSION_ACCOUNTS.items():
-            fake_id = -(abs(hash(ss)) % 999999 + 1)
-            client = _clients.get(fake_id)
+            client = next((ub for ub in _clients.values() if ub.phone == f"ENV_SESSION_{num}"), None)
             status = S.status_badge(bool(client.is_connected) if client else False)
             name = client.display_name() if client else "—"
+            db_id = client.account_id if client else "—"
             preview = ss[:8] + "..." + ss[-4:] if len(ss) > 14 else ss
             lines.append(
                 f"▸ *SESSION\\_{num}*\n"
                 f"  👤 {name} | {status}\n"
-                f"  🆔 `{fake_id}`\n"
+                f"  🆔 `{db_id}`\n"
                 f"  🔐 `{preview}`\n"
             )
         bot.send_message(msg.chat.id, "\n".join(lines), parse_mode="Markdown")
@@ -2713,8 +2880,8 @@ def setup_bot():
             f"🔄 *إعادة تحميل {len(SESSION_ACCOUNTS)} Session String...*",
             parse_mode="Markdown"
         )
-        # حذف الجلسات البيئية القديمة أولاً
-        to_remove = [aid for aid in list(_clients.keys()) if aid < 0]
+        # فصل الجلسات البيئية القديمة أولاً
+        to_remove = [aid for aid, ub in list(_clients.items()) if ub.phone.startswith("ENV_SESSION_")]
         for aid in to_remove:
             arun(_clients[aid].disconnect())
             _clients.pop(aid, None)
