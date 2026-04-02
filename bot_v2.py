@@ -197,9 +197,10 @@ class Style:
             dt = datetime.fromisoformat(dt_str)
             now = datetime.utcnow()
             diff = now - dt
-            if diff.seconds < 60:    return "منذ لحظات"
-            if diff.seconds < 3600:  return f"منذ {diff.seconds//60} دقيقة"
-            if diff.days == 0:       return f"منذ {diff.seconds//3600} ساعة"
+            total = int(diff.total_seconds())
+            if total < 60:    return "منذ لحظات"
+            if total < 3600:  return f"منذ {total//60} دقيقة"
+            if total < 86400: return f"منذ {total//3600} ساعة"
             if diff.days == 1:       return "أمس"
             return dt.strftime("%Y-%m-%d %H:%M")
         except Exception:
@@ -239,7 +240,7 @@ S = Style()
 # ══════════════════════════════════════════════
 
 BOT_TOKEN   = os.getenv("BOT_TOKEN", "")
-ADMIN_IDS   = list(map(int, os.getenv("ADMIN_IDS","0").split(","))) if os.getenv("ADMIN_IDS") else []
+ADMIN_IDS   = [int(x) for x in os.getenv("ADMIN_IDS","").split(",") if x.strip()]
 ENC_KEY     = os.getenv("ENCRYPTION_KEY", "")
 TIMEZONE    = os.getenv("TIMEZONE", "Africa/Cairo")
 # دعم Session Strings متعددة
@@ -672,8 +673,8 @@ async def smart_delay(aid: int, mn=None, mx=None):
             await asyncio.sleep(remaining)
         del _flood_until[aid]
 
-    mn = mn or MIN_DELAY
-    mx = mx or MAX_DELAY
+    mn = MIN_DELAY if mn is None else mn
+    mx = MAX_DELAY if mx is None else mx
     delay = random.uniform(mn, mx)
 
     # Jitter إضافي أحيانًا
@@ -1166,6 +1167,21 @@ def mgr_count() -> int:
 def mgr_all_status() -> List[dict]:
     return [c.info_dict() for c in _clients.values()]
 
+def mgr_get_all_for_task() -> List[dict]:
+    """جلب كل الحسابات المتصلة (DB + Session Strings) لاختيارها في المهام"""
+    result = []
+    for aid, ub in _clients.items():
+        if not ub.is_connected:
+            continue
+        result.append({
+            "id":        aid,
+            "phone":     ub.phone,
+            "full_name": ub.display_name(),
+            "username":  ub._me.username if ub._me else None,
+            "is_env":    aid < 0,
+        })
+    return result
+
 # ══════════════════════════════════════════════
 #  📅 Scheduler
 # ══════════════════════════════════════════════
@@ -1208,7 +1224,8 @@ async def _run_task(sid, tid, aid, task_type, target, content, parse_mode):
             else:
                 ok = False
             status = "success" if ok else "failed"
-            await db_update_task(tid, run_count=0)  # سيُحسب لاحقًا
+            await _db.execute("UPDATE tasks SET run_count=run_count+1 WHERE id=?", (tid,))
+            await _db.commit()
         except Exception as e:
             msg = str(e)
     ms = int((time.monotonic()-t0)*1000)
@@ -1714,7 +1731,9 @@ def setup_bot():
     def acc_step_2fa(msg: Message):
         uid   = msg.from_user.id
         state = _states[uid]
-        result = arun(mgr_complete_login(state["phone"], "", password=msg.text.strip()))
+        phone = state["phone"]
+        code  = state.get("code", "")
+        result = arun(mgr_complete_login(phone, code, password=msg.text.strip()))
         clear_state(uid)
         if result["status"] == "success":
             bot.send_message(msg.chat.id,
@@ -1890,16 +1909,16 @@ def setup_bot():
     @bot.message_handler(commands=["addtask"])
     def cmd_addtask(msg: Message):
         if not is_admin(msg): return
-        accounts = arun(db_get_all_accounts(active_only=True))
+        accounts = mgr_get_all_for_task()
         if not accounts:
-            return bot.reply_to(msg, "❌ لا توجد حسابات نشطة")
+            return bot.reply_to(msg, "❌ لا توجد حسابات نشطة — تحقق من SESSION_ في متغيرات البيئة")
         uid = msg.from_user.id
         set_state(uid, {"step":"task_account"})
         kb = InlineKeyboardMarkup(row_width=1)
         for a in accounts:
-            icon = "🟢" if mgr_is_connected(a["id"]) else "🟡"
+            icon = "🟢"
             kb.add(InlineKeyboardButton(
-                f"{icon} {a.get('full_name') or a['phone']}",
+                f"{icon} {a.get('full_name') or a['phone']} (#{a['id']})",
                 callback_data=f"task_acc_pick_{a['id']}"
             ))
         bot.send_message(msg.chat.id,
@@ -1984,7 +2003,7 @@ def setup_bot():
         _finish_task(msg, uid)
 
     def _finish_task(msg, uid):
-        state = _states.pop(uid)
+        state = _states.get(uid, {})
         try:
             tid = arun(db_add_task(
                 state["name"], state["account_id"], state["task_type"],
@@ -1997,6 +2016,7 @@ def setup_bot():
                 InlineKeyboardButton("📅 جدولة",        callback_data=f"task_sched_{tid}"),
                 InlineKeyboardButton("📋 المهام",       callback_data="task_list"),
             )
+            clear_state(uid)
             bot.send_message(msg.chat.id,
                 f"`{'━'*28}`\n"
                 f"  ✅ *المهمة أُنشئت بنجاح!*\n"
@@ -2059,7 +2079,7 @@ def setup_bot():
         for j in jobs[:5]:
             kb.add(InlineKeyboardButton(
                 f"🗑 حذف: {j['name'][:20]}",
-                callback_data=f"sched_delete_{j['id'].replace('s','')}"
+                callback_data=f"sched_delete_{j['id'].lstrip('s')}"
             ))
         kb.add(InlineKeyboardButton("◀️ رجوع", callback_data="menu_schedules"))
         edit_or_send(call, "\n".join(lines), kb)
@@ -2154,7 +2174,7 @@ def setup_bot():
         try:
             if stype == "once":
                 dt = datetime.strptime(text, "%Y-%m-%d %H:%M")
-                if dt < datetime.now():
+                if dt < datetime.now(TZ).replace(tzinfo=None):
                     return bot.reply_to(msg, "❌ الوقت في الماضي! أدخل وقتًا مستقبليًا")
                 tdata = {"datetime": dt.isoformat()}
             elif stype == "interval":
@@ -2190,7 +2210,7 @@ def setup_bot():
     @bot.message_handler(func=lambda m: in_state(m.from_user.id,"sched_max"))
     def sched_step_max(msg: Message):
         uid   = msg.from_user.id
-        state = _states.pop(uid)
+        state = _states.get(uid, {})
         try:
             n = int(msg.text.strip())
             if n < 0: raise ValueError()
@@ -2674,7 +2694,7 @@ def setup_bot():
         for num, ss in SESSION_ACCOUNTS.items():
             fake_id = -(abs(hash(ss)) % 999999 + 1)
             client = _clients.get(fake_id)
-            status = S.status_badge(client.is_connected if client else False)
+            status = S.status_badge(bool(client.is_connected) if client else False)
             name = client.display_name() if client else "—"
             preview = ss[:8] + "..." + ss[-4:] if len(ss) > 14 else ss
             lines.append(
@@ -2690,7 +2710,7 @@ def setup_bot():
         if not is_admin(msg): return
         if not SESSION_ACCOUNTS:
             return bot.reply_to(msg, "⚠️ لا توجد SESSION_ متغيرات في البيئة", parse_mode="Markdown")
-        m = bot.reply_to(msg,
+        sent_msg = bot.reply_to(msg,
             f"🔄 *إعادة تحميل {len(SESSION_ACCOUNTS)} Session String...*",
             parse_mode="Markdown"
         )
@@ -2714,7 +2734,7 @@ def setup_bot():
             f"🔑 إجمالي: `{len(SESSION_ACCOUNTS)}`\n"
             f"🟢 متصل: `{ok}`\n"
             f"🔴 فشل: `{len(SESSION_ACCOUNTS) - ok}`",
-            m.chat.id, m.message_id, parse_mode="Markdown"
+            sent_msg.chat.id, sent_msg.message_id, parse_mode="Markdown"
         )
 
     @bot.message_handler(func=lambda m: True)
@@ -2737,6 +2757,40 @@ async def startup():
     await sched_load_all()
     _scheduler.start()
     logger.info("✅ النظام يعمل بالكامل!")
+
+async def _send_startup_message():
+    """إرسال رسالة بدء التشغيل لجميع الأدمنز"""
+    if not bot or not ADMIN_IDS:
+        return
+    connected = mgr_get_all_for_task()
+    now = datetime.now(TZ).strftime("%Y-%m-%d %H:%M:%S")
+    divider = "\u2501" * 28
+    if connected:
+        lines = []
+        for a in connected:
+            tag = " \U0001f511" if a["is_env"] else ""
+            lines.append(f"  \U0001f7e2 {a['full_name']} (#{a['id']}){tag}")
+        acc_block = "\n".join(lines)
+        text = (
+            "\U0001f916 *" + BOT_NAME + " \u0634\u063a\u0627\u0644!*\n"
+            "`" + divider + "`\n\n"
+            "\U0001f550 `" + now + "`\n"
+            "\u2705 *" + str(len(connected)) + " \u062d\u0633\u0627\u0628 \u0645\u062a\u0635\u0644:*\n"
+            + acc_block
+        )
+    else:
+        text = (
+            "\U0001f916 *" + BOT_NAME + " \u0634\u063a\u0627\u0644!*\n"
+            "`" + divider + "`\n\n"
+            "\U0001f550 `" + now + "`\n"
+            "\u26a0\ufe0f \u0644\u0627 \u062a\u0648\u062c\u062f \u062d\u0633\u0627\u0628\u0627\u062a \u0645\u062a\u0635\u0644\u0629 \u062d\u0627\u0644\u064a\u0627\u064b"
+        )
+    for admin_id in ADMIN_IDS:
+        try:
+            bot.send_message(admin_id, text, parse_mode="Markdown")
+        except Exception as e:
+            logger.warning(f"startup msg failed for {admin_id}: {e}")
+
 
 async def shutdown():
     logger.info("⏳ جاري الإيقاف...")
@@ -2770,6 +2824,10 @@ def main():
         setup_bot()
         t = threading.Thread(target=run_bot, daemon=True)
         t.start()
+        # إرسال رسالة بدء التشغيل للأدمن
+        import time as _time
+        _time.sleep(2)  # انتظر حتى يتصل البوت
+        _loop.run_until_complete(_send_startup_message())
 
     def _sig(sig, frame):
         _loop.run_until_complete(shutdown())
