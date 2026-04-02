@@ -453,7 +453,12 @@ async def db_delete_account(aid: int):
     await _db.execute("DELETE FROM accounts WHERE id=?", (aid,))
     await _db.commit()
 
+_ALLOWED_STAT_FIELDS = {"msg_count", "join_count"}
+
 async def db_increment_account_stat(aid: int, field: str):
+    if field not in _ALLOWED_STAT_FIELDS:
+        logger.error(f"حقل غير مسموح: {field}")
+        return
     await _db.execute(f"UPDATE accounts SET {field}={field}+1, last_used=datetime('now') WHERE id=?", (aid,))
     await _db.commit()
 
@@ -1130,6 +1135,8 @@ async def mgr_begin_login(phone, api_id, api_hash) -> dict:
         _login_sessions[phone] = {"ub":ub,"hash":h,"api_id":api_id,"api_hash":api_hash,"sname":sname}
         return {"status":"code_sent"}
     except Exception as e:
+        try: await ub.disconnect()
+        except Exception: pass
         return {"status":"error","message":str(e)}
 
 async def mgr_complete_login(phone, code, password=None, notes=None) -> dict:
@@ -1161,7 +1168,7 @@ async def mgr_remove(aid: int):
         await _clients[aid].disconnect()
         _clients.pop(aid, None)
         _actions.pop(aid, None)
-    _buckets.pop(aid, None)  # FIX: تنظيف bucket الخاص بالحساب
+    _buckets.pop(aid, None)
     await db_delete_account(aid)
 
 def mgr_actions(aid: int) -> Optional[UserBotActions]:
@@ -1228,6 +1235,7 @@ async def _run_task(sid, tid, aid, task_type, target, content, parse_mode):
         msg = f"الحساب {aid} غير متصل"
     else:
         try:
+            ok = False
             if task_type == "send_message":
                 ok = await actions.send_message(target, content or "", parse_mode)
             elif task_type == "join_group":
@@ -1237,13 +1245,14 @@ async def _run_task(sid, tid, aid, task_type, target, content, parse_mode):
             elif task_type == "forward":
                 parts = (content or "").split(":")
                 ok = await actions.forward_message(parts[0], int(parts[1]), target) if len(parts)==2 else False
-            else:
-                ok = False
             status = "success" if ok else "failed"
+            msg    = "تم التنفيذ" if ok else "فشل التنفيذ"
             await _db.execute("UPDATE tasks SET run_count=run_count+1 WHERE id=?", (tid,))
             await _db.commit()
         except Exception as e:
-            msg = str(e)
+            status = "failed"
+            msg    = str(e)
+            logger.error(f"❌ استثناء في مهمة {tid}: {e}")
     ms = int((time.monotonic()-t0)*1000)
     await db_log(tid, sid, aid, status, msg, ms)
     await db_update_schedule_run(sid)
@@ -1253,17 +1262,18 @@ async def _run_task(sid, tid, aid, task_type, target, content, parse_mode):
 async def sched_add(tid, ttype, tdata, max_runs=-1) -> int:
     task = await db_get_task(tid)
     if not task: raise ValueError("مهمة غير موجودة")
-    sid = await db_add_schedule(tid, ttype, tdata, max_runs)
     trigger = _build_trigger(ttype, tdata)
-    if trigger:
-        _scheduler.add_job(
-            _run_task, trigger, id=f"s{sid}",
-            name=task["name"],
-            kwargs=dict(sid=sid,tid=tid,aid=task["account_id"],
-                        task_type=task["task_type"],target=task["target"],
-                        content=task.get("content",""),parse_mode=task.get("parse_mode","markdown")),
-            replace_existing=True, max_instances=1, misfire_grace_time=300,
-        )
+    if not trigger:
+        raise ValueError("بيانات الجدول غير صالحة")
+    sid = await db_add_schedule(tid, ttype, tdata, max_runs)
+    _scheduler.add_job(
+        _run_task, trigger, id=f"s{sid}",
+        name=task["name"],
+        kwargs=dict(sid=sid,tid=tid,aid=task["account_id"],
+                    task_type=task["task_type"],target=task["target"],
+                    content=task.get("content",""),parse_mode=task.get("parse_mode","markdown")),
+        replace_existing=True, max_instances=1, misfire_grace_time=300,
+    )
     return sid
 
 async def sched_remove(sid: int):
@@ -1287,7 +1297,10 @@ async def sched_load_all():
     logger.info(f"✅ {len(schedules)} جدول محمّل")
 
 def sched_jobs() -> list:
-    return [{"id":j.id,"name":j.name,"next":str(j.next_run_time)} for j in _scheduler.get_jobs()]
+    return [
+        {"id": j.id, "name": j.name, "next": str(j.next_run_time)[:16] if j.next_run_time else "—"}
+        for j in _scheduler.get_jobs()
+    ]
 
 # ══════════════════════════════════════════════
 #  🎛 Keyboards
@@ -2094,7 +2107,7 @@ def setup_bot():
         for j in jobs[:5]:
             kb.add(InlineKeyboardButton(
                 f"🗑 حذف: {j['name'][:20]}",
-                callback_data=f"sched_delete_{j['id'][1:]}"  # FIX: بدل lstrip الخطرة
+                callback_data=f"sched_delete_{j['id'][1:]}"
             ))
         kb.add(InlineKeyboardButton("◀️ رجوع", callback_data="menu_schedules"))
         edit_or_send(call, "\n".join(lines), kb)
@@ -2444,12 +2457,10 @@ def setup_bot():
         edit_or_send(call, "\n".join(lines), kb_back("menu_protection"))
         bot.answer_callback_query(call.id)
 
-    # FIX: handler مفقود لـ bl_remove
     @bot.callback_query_handler(func=lambda c: c.data == "bl_remove")
     def cb_bl_remove(call: CallbackQuery):
         if not is_admin(call): return
-        uid = call.from_user.id
-        set_state(uid, {"step": "bl_remove_target"})
+        set_state(call.from_user.id, {"step": "bl_remove_target"})
         edit_or_send(call,
             f"{S.header('إزالة من القائمة السوداء', S.SHIELD)}\n\n"
             f"أرسل الهدف المراد إزالته:\n`@username` أو `-1001234`"
@@ -2458,54 +2469,43 @@ def setup_bot():
 
     @bot.message_handler(func=lambda m: in_state(m.from_user.id, "bl_remove_target"))
     def bl_step_remove(msg: Message):
-        uid    = msg.from_user.id
+        uid = msg.from_user.id
         target = msg.text.strip()
         clear_state(uid)
         arun(db_remove_blacklist(target))
         bot.send_message(msg.chat.id,
             f"✅ *تم إزالة* `{target}` *من القائمة السوداء*",
-            parse_mode="Markdown",
-            reply_markup=kb_back("menu_protection")
+            parse_mode="Markdown", reply_markup=kb_back("menu_protection")
         )
 
-    # FIX: handler مفقود لـ acc_tasks
     @bot.callback_query_handler(func=lambda c: c.data.startswith("acc_tasks_"))
     def cb_acc_tasks(call: CallbackQuery):
         if not is_admin(call): return
-        aid   = int(call.data.split("_")[-1])
+        bot.answer_callback_query(call.id, "⏳ جاري التحميل...")
+        aid = int(call.data.split("_")[-1])
         tasks = arun(db_get_all_tasks(account_id=aid))
         if not tasks:
-            edit_or_send(call,
-                f"{S.header(f'مهام الحساب {aid}', S.TASK)}\n\n📭 _لا توجد مهام لهذا الحساب_",
-                kb_back(f"acc_detail_{aid}")
-            )
-            bot.answer_callback_query(call.id)
+            edit_or_send(call, f"📭 _لا توجد مهام للحساب {aid}_", kb_back(f"acc_detail_{aid}"))
             return
         lines = [f"{S.header(f'مهام الحساب {aid}', S.TASK)}\n"]
-        kb    = InlineKeyboardMarkup(row_width=2)
+        kb = InlineKeyboardMarkup(row_width=1)
         for t in tasks[:8]:
             icon = S.task_type_icon(t["task_type"])
-            lines.append(
-                f"\n{icon} `{t['id']}` *{t['name']}*\n"
-                f"  🎯 `{t['target']}` • {S.task_type_ar(t['task_type'])}"
-            )
+            lines.append(f"\n{icon} `{t['id']}` *{t['name']}* → `{t['target']}`")
             kb.add(InlineKeyboardButton(
-                f"{icon} {t['name'][:20]}",
+                f"{icon} {t['name'][:25]} (#{t['id']})",
                 callback_data=f"task_detail_{t['id']}"
             ))
         kb.add(InlineKeyboardButton("◀️ رجوع", callback_data=f"acc_detail_{aid}"))
         edit_or_send(call, "\n".join(lines), kb)
-        bot.answer_callback_query(call.id)
 
-    # FIX: handler مفقود لـ task_edit
     @bot.callback_query_handler(func=lambda c: c.data.startswith("task_edit_"))
     def cb_task_edit(call: CallbackQuery):
         if not is_admin(call): return
         tid = int(call.data.split("_")[-1])
-        bot.answer_callback_query(call.id, "⚠️ تعديل المهام قيد التطوير")
+        bot.answer_callback_query(call.id, "⚠️ قيد التطوير")
         edit_or_send(call,
-            f"⚠️ *ميزة التعديل قيد التطوير*\n\n"
-            f"يمكنك حذف المهمة `{tid}` وإنشاء واحدة جديدة بدلاً منها.",
+            f"⚠️ *ميزة التعديل قيد التطوير*\n\nاحذف المهمة `{tid}` وأنشئ واحدة جديدة.",
             kb_back(f"task_detail_{tid}")
         )
 
@@ -2711,14 +2711,13 @@ def setup_bot():
 
     @bot.message_handler(commands=["update"])
     def cmd_update(msg: Message):
-        """تحديث ملف البوت بدون GitHub"""
         if not is_admin(msg): return
         bot.send_message(msg.chat.id,
             f"`{'━'*28}`\n"
             f"  🔄 *تحديث ملف البوت*\n"
             f"`{'━'*28}`\n\n"
             f"📤 أرسل ملف `.py` الجديد الآن\n\n"
-            f"_سيتم استبدال الملف الحالي وإعادة التشغيل تلقائيًا_",
+            f"_سيتم استبدال الملف الحالي وإعادة التشغيل_",
             parse_mode="Markdown"
         )
         set_state(msg.from_user.id, {"step": "awaiting_update_file"})
@@ -2728,62 +2727,46 @@ def setup_bot():
         func=lambda m: in_state(m.from_user.id, "awaiting_update_file")
     )
     def handle_update_file(msg: Message):
-        """استقبال الملف الجديد وتطبيق التحديث"""
         if not is_admin(msg): return
         uid = msg.from_user.id
         doc = msg.document
-
-        # التحقق من أن الملف Python
         if not (doc.file_name or "").endswith(".py"):
             bot.reply_to(msg, "❌ يجب أن يكون الملف بصيغة `.py`", parse_mode="Markdown")
             return
-
         sent = bot.reply_to(msg, "⏳ _جاري تحميل الملف..._", parse_mode="Markdown")
-
         try:
-            # تحميل الملف
             file_info = bot.get_file(doc.file_id)
             file_data = bot.download_file(file_info.file_path)
-
-            # التحقق من صحة الكود (syntax check)
             try:
                 compile(file_data, doc.file_name, "exec")
             except SyntaxError as e:
                 clear_state(uid)
                 bot.edit_message_text(
-                    f"❌ *خطأ في صياغة الكود!*\n\n`{e}`\n\n_الملف القديم محتفظ به_",
+                    f"❌ *خطأ في الكود!*\n\n`{e}`\n\n_الملف القديم محتفظ به_",
                     sent.chat.id, sent.message_id, parse_mode="Markdown"
                 )
                 return
-
-            # حساب مسار الملف الحالي
+            import shutil
             current_file = Path(__file__).resolve()
             backup_file  = current_file.with_suffix(".py.bak")
-
-            # نسخ احتياطية
-            import shutil
             shutil.copy2(current_file, backup_file)
-
-            # كتابة الملف الجديد
             current_file.write_bytes(file_data)
-
             clear_state(uid)
             bot.edit_message_text(
                 f"✅ *تم التحديث بنجاح!*\n\n"
-                f"📁 الملف: `{doc.file_name}`\n"
-                f"💾 حجم: `{len(file_data):,}` byte\n"
-                f"📂 نسخة احتياطية: `{backup_file.name}`\n\n"
+                f"📁 `{doc.file_name}` — `{len(file_data):,}` byte\n"
+                f"💾 نسخة احتياطية: `{backup_file.name}`\n\n"
                 f"🔄 *جاري إعادة التشغيل...*",
                 sent.chat.id, sent.message_id, parse_mode="Markdown"
             )
-
-            logger.info(f"✅ تحديث ناجح من {msg.from_user.id} — إعادة تشغيل...")
-
-            # إعادة التشغيل
+            logger.info(f"✅ تحديث من {msg.from_user.id} — إعادة تشغيل...")
             import time as _t
-            _t.sleep(1.5)
-            os.execv(sys.executable, [sys.executable] + sys.argv)
-
+            def _restart():
+                _t.sleep(1.5)
+                try: _scheduler.shutdown(wait=False)
+                except Exception: pass
+                os.execv(sys.executable, [sys.executable] + sys.argv)
+            threading.Thread(target=_restart, daemon=True).start()
         except Exception as e:
             clear_state(uid)
             logger.error(f"فشل التحديث: {e}")
@@ -2815,8 +2798,6 @@ def setup_bot():
             f"/stats — إحصائيات\n"
             f"/ping — اختبار\n"
             f"/menu — القائمة الرئيسية\n\n"
-            f"*🔄 التحديث:*\n"
-            f"/update — تحديث ملف البوت\n\n"
             f"*🔑 Session Strings:*\n"
             f"/showsessions — عرض جلسات البيئة\n"
             f"/reloadsessions — إعادة تحميل الجلسات",
@@ -2841,7 +2822,6 @@ def setup_bot():
             BotCommand("dialogs",        "💬 عرض المحادثات"),
             BotCommand("showsessions",   "🔑 عرض Session Strings"),
             BotCommand("reloadsessions", "🔄 إعادة تحميل الجلسات"),
-            BotCommand("update",         "🔄 تحديث ملف البوت"),
             BotCommand("help",           "❓ المساعدة"),
         ])
         bot.reply_to(msg, "✅ *تم تعيين الأوامر بنجاح!*", parse_mode="Markdown")
@@ -2990,9 +2970,14 @@ def main():
         setup_bot()
         t = threading.Thread(target=run_bot, daemon=True)
         t.start()
-        # إرسال رسالة بدء التشغيل للأدمن
         import time as _time
-        _time.sleep(2)  # انتظر حتى يتصل البوت
+        for _ in range(15):
+            _time.sleep(1)
+            try:
+                bot.get_me()
+                break
+            except Exception:
+                pass
         _loop.run_until_complete(_send_startup_message())
 
     def _sig(sig, frame):
