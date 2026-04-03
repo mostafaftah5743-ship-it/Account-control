@@ -891,6 +891,12 @@ class UserBotActions:
 
     async def send_message(self, target, text, parse_mode="markdown", typing=False, reply_to=None) -> bool:
         if not self.ub.is_connected: return False
+        # تحويل الأرقام النصية إلى int حتى يجد Telethon الـ entity صح (مهم للجروبات)
+        if isinstance(target, str) and target.strip().lstrip("-").isdigit():
+            try:
+                target = int(target.strip())
+            except (ValueError, TypeError):
+                pass
         if await db_is_blacklisted(str(target)):
             logger.warning(f"[{self.ub.phone}] {target} في القائمة السوداء")
             return False
@@ -1377,15 +1383,11 @@ def kb_main_menu() -> InlineKeyboardMarkup:
         InlineKeyboardButton("🛡️ الحماية",        callback_data="menu_protection"),
     )
     kb.row(
-        InlineKeyboardButton("🔔 الإشعارات",     callback_data="menu_notifications"),
         InlineKeyboardButton("🤝 كلّم صاحب",     callback_data="menu_dm"),
-    )
-    kb.row(
         InlineKeyboardButton("👥 أصدقائي وجروباتي", callback_data="menu_social"),
     )
     kb.row(
-        InlineKeyboardButton("🔄 تحديث القائمة", callback_data="back_main"),
-        InlineKeyboardButton("🔁 إعادة تشغيل البوت", callback_data="bot_restart"),
+        InlineKeyboardButton("📤 تحديث الملف",   callback_data="menu_update_file"),
     )
     return kb
 
@@ -1470,14 +1472,28 @@ def is_admin(msg_or_call) -> bool:
     uid = msg_or_call.from_user.id if hasattr(msg_or_call,"from_user") else msg_or_call
     return uid in ADMIN_IDS
 
+def _escape_md(text: str) -> str:
+    """هروب من حروف Markdown الخاصة في النصوص الديناميكية"""
+    if not text:
+        return "—"
+    for ch in ['_', '*', '`', '[', ']']:
+        text = text.replace(ch, '\\' + ch)
+    return text
+
 def edit_or_send(call: CallbackQuery, text: str, kb=None, parse_mode="Markdown"):
     try:
         bot.edit_message_text(
             text, call.message.chat.id, call.message.message_id,
             parse_mode=parse_mode, reply_markup=kb
         )
-    except Exception:
-        bot.send_message(call.message.chat.id, text, parse_mode=parse_mode, reply_markup=kb)
+    except Exception as _e:
+        # لو المحتوى مش بيتغير تجاهل الخطأ بصمت
+        if "message is not modified" in str(_e).lower():
+            return
+        try:
+            bot.send_message(call.message.chat.id, text, parse_mode=parse_mode, reply_markup=kb)
+        except Exception:
+            pass
 
 # حالات المحادثات
 _states: Dict[int, dict] = {}
@@ -1580,6 +1596,22 @@ def setup_bot():
             except Exception: pass
             os.execv(sys.executable, [sys.executable] + sys.argv)
         threading.Thread(target=_restart, daemon=True).start()
+
+    @bot.callback_query_handler(func=lambda c: c.data == "menu_update_file")
+    def cb_menu_update_file(call: CallbackQuery):
+        if not is_admin(call): return
+        uid = call.from_user.id
+        set_state(uid, {"step": "awaiting_update_file"})
+        edit_or_send(call,
+            f"`╔══════════════════════════╗`\n"
+            f"`║  📤  تحديث ملف البوت     ║`\n"
+            f"`╚══════════════════════════╝`\n\n"
+            f"📎 أرسل الملف `.py` الجديد الآن\n\n"
+            f"_سيتم التحقق من الكود ثم استبدال الملف الحالي وإعادة التشغيل تلقائياً_\n\n"
+            f"💾 نسخة احتياطية ستُحفظ تلقائياً",
+            kb_back("back_main")
+        )
+        bot.answer_callback_query(call.id)
 
     # ══════════════════════════════════════════
     #  🤝 إرسال رسالة لصاحب (DM Friends)
@@ -1752,8 +1784,8 @@ def setup_bot():
             is_conn = mgr_is_connected(a["id"])
             badge = "🟢" if is_conn else ("🚫" if a.get("is_banned") else "🔴")
             raw_name = a.get("full_name") or a.get("phone", "—")
-            name = raw_name.replace("_", r"\_").replace("*", r"\*")
-            uname = f"  @{a['username']}" if a.get("username") else ""
+            name = _escape_md(str(raw_name))
+            uname = f"  @{_escape_md(a['username'])}" if a.get("username") else ""
             env_tag = " 🔑" if str(a.get("phone","")).startswith(("ENV_SESSION_","BOT_SS_")) else ""
             lines.append(
                 f"{badge} *{name}*{uname}{env_tag}\n"
@@ -1800,13 +1832,16 @@ def setup_bot():
                     return
             connected = mgr_is_connected(aid)
             badge     = "🟢 متصل" if connected else ("🚫 محظور" if acc.get("is_banned") else "🔴 منفصل")
+            safe_name  = _escape_md(str(acc.get('full_name') or '—'))
+            safe_uname = ("@" + _escape_md(acc['username'])) if acc.get('username') else '—'
+            safe_phone = _escape_md(str(acc.get('phone','—'))[:20])
             text = (
                 f"`╔══════════════════════════╗`\n"
                 f"`║  👤  تفاصيل الحساب       ║`\n"
                 f"`╚══════════════════════════╝`\n\n"
-                f"*الاسم:*   {acc.get('full_name','—')}\n"
-                f"*يوزر:*   {'@'+acc['username'] if acc.get('username') else '—'}\n"
-                f"*هاتف:*   `{acc['phone']}`\n"
+                f"*الاسم:*   {safe_name}\n"
+                f"*يوزر:*   {safe_uname}\n"
+                f"*هاتف:*   `{safe_phone}`\n"
                 f"*ID:*       `{acc['id']}`\n\n"
                 f"┌─ *الحالة* ───────────────\n"
                 f"│  {badge}\n"
@@ -2316,14 +2351,16 @@ def setup_bot():
             return
         acc  = arun(db_get_account(task["account_id"]))
         icon = S.task_type_icon(task["task_type"])
+        safe_tname = _escape_md(task['name'])
+        safe_aname = _escape_md(acc.get('full_name','?') if acc else '?')
         text = (
             f"`╔══════════════════════════╗`\n"
             f"`║  {icon}  تفاصيل المهمة       ║`\n"
             f"`╚══════════════════════════╝`\n\n"
-            f"*الاسم:*    {task['name']}\n"
+            f"*الاسم:*    {safe_tname}\n"
             f"*النوع:*    {S.task_type_ar(task['task_type'])}\n"
             f"*الهدف:*    `{task['target']}`\n"
-            f"*الحساب:*  {acc.get('full_name','?') if acc else '?'} `#{task['account_id']}`\n"
+            f"*الحساب:*  {safe_aname} `#{task['account_id']}`\n"
             f"*ID:*        `{task['id']}`\n"
         )
         if task.get("content"):
@@ -2736,8 +2773,9 @@ def setup_bot():
                 f"`║  🔁  فترة التكرار         ║`\n"
                 f"`╚══════════════════════════╝`\n\n"
                 f"أرسل الفترة الزمنية:\n\n"
-                f"• `hours=2` — كل ساعتين\n"
+                f"• `seconds=30` — كل 30 ثانية\n"
                 f"• `minutes=30` — كل 30 دقيقة\n"
+                f"• `hours=2` — كل ساعتين\n"
                 f"• `days=1` — كل يوم\n"
                 f"• `hours=1 minutes=30` — كل ساعة ونصف"
             ),
@@ -3641,9 +3679,11 @@ def setup_bot():
     @bot.callback_query_handler(func=lambda c: c.data.startswith("fg_dm_"))
     def cb_fg_dm(call: CallbackQuery):
         if not is_admin(call): return
-        parts = call.data.split("_", 3)  # fg_dm_AID_TARGET
-        aid    = int(parts[2])
-        target = parts[3]
+        # fg_dm_AID_TARGET — TARGET قد يحتوي على _
+        raw = call.data[len("fg_dm_"):]
+        sep = raw.index("_")
+        aid    = int(raw[:sep])
+        target = raw[sep+1:]
         uid    = call.from_user.id
         set_state(uid, {"step": "fg_dm_text", "account_id": aid, "target": target})
         edit_or_send(call,
@@ -3742,8 +3782,9 @@ def setup_bot():
         for d in groups[:20]:
             title = getattr(d.entity, "title", "؟")
             uname = f"@{d.entity.username}" if getattr(d.entity, "username", None) else f"id:{d.entity.id}"
-            lines.append(f"👥 *{title}*  `{uname}`")
-            target = d.entity.username or str(d.entity.id)
+            lines.append(f"👥 *{_escape_md(title)}*  `{uname}`")
+            # نستخدم username لو موجود وإلا chat_id
+            target = d.entity.username if getattr(d.entity, "username", None) else str(d.entity.id)
             btn_data = f"fg_grp_{aid}_{target}"
             kb.add(InlineKeyboardButton(
                 f"💬 {title[:18]}",
@@ -3756,9 +3797,11 @@ def setup_bot():
     @bot.callback_query_handler(func=lambda c: c.data.startswith("fg_grp_"))
     def cb_fg_grp(call: CallbackQuery):
         if not is_admin(call): return
-        parts  = call.data.split("_", 3)  # fg_grp_AID_TARGET
-        aid    = int(parts[2])
-        target = parts[3]
+        # fg_grp_AID_TARGET — TARGET قد يحتوي على _
+        raw = call.data[len("fg_grp_"):]  # "AID_TARGET"
+        sep = raw.index("_")
+        aid    = int(raw[:sep])
+        target = raw[sep+1:]
         uid    = call.from_user.id
         set_state(uid, {"step": "fg_grp_text", "account_id": aid, "target": target})
         edit_or_send(call,
@@ -3781,8 +3824,13 @@ def setup_bot():
         actions = mgr_actions(aid)
         if not actions:
             return bot.send_message(msg.chat.id, "❌ *الحساب غير متصل*", parse_mode="Markdown")
+        # تحويل الـ target لـ int لو كان رقم (لازم للجروبات)
+        send_target = target
+        if isinstance(send_target, str) and send_target.strip().lstrip("-").isdigit():
+            try: send_target = int(send_target.strip())
+            except (ValueError, TypeError): pass
         m2 = bot.send_message(msg.chat.id, S.loading(f"إرسال إلى {target}"), parse_mode="Markdown")
-        ok = arun(actions.send_message(target, text))
+        ok = arun(actions.send_message(send_target, text))
         kb = InlineKeyboardMarkup(row_width=2)
         kb.add(
             InlineKeyboardButton("👥 الجروبات", callback_data="fg_groups"),
@@ -3976,7 +4024,8 @@ def setup_bot():
             f"`║  🔁  رسالة متكررة 4/4    ║`\n"
             f"`╚══════════════════════════╝`\n\n"
             f"⏱️ كل قد إيه هتتبعت الرسالة؟\n\n"
-            f"• `minutes=30` — كل 30 دقيقة\n"
+            f"• `seconds=30` — كل 30 ثانية\n"
+            f"• `minutes=5` — كل 5 دقائق\n"
             f"• `hours=1` — كل ساعة\n"
             f"• `hours=2 minutes=30` — كل ساعتين ونص\n"
             f"• `days=1` — كل يوم",
@@ -4014,9 +4063,8 @@ def setup_bot():
             ))
             sid = arun(sched_add(tid, "interval", tdata, max_runs=-1))
             # تحويل الفترة لنص مقروء
-            parts_txt = []
-            for k, v in tdata.items():
-                parts_txt.append(f"{v} {'ساعة' if k=='hours' else 'يوم' if k=='days' else 'دقيقة' if k=='minutes' else k}")
+            _unit_ar = {"seconds": "ثانية", "minutes": "دقيقة", "hours": "ساعة", "days": "يوم", "weeks": "أسبوع"}
+            parts_txt = [f"{v} {_unit_ar.get(k, k)}" for k, v in tdata.items()]
             interval_txt = " و".join(parts_txt)
             kb = InlineKeyboardMarkup(row_width=2)
             kb.add(
@@ -4155,7 +4203,7 @@ async def _send_startup_message():
     jobs = len(sched_jobs())
     if connected:
         acc_lines = "\n".join(
-            f"  🟢 {a['full_name']} `(#{a['id']})`{'  🔑' if a.get('is_env') else ''}"
+            f"  🟢 {_escape_md(a['full_name'])} `(#{a['id']})`{'  🔑' if a.get('is_env') else ''}"
             for a in connected
         )
         text = (
